@@ -17,6 +17,9 @@ export class Whiteboard {
     lmb: false,
     rmb: false,
   };
+  frameCount = 0;
+  lastTime = Date.now();
+  currentTime = Date.now();
 
   constructor(ctx: CanvasRenderingContext2D, options?: WhiteboardOptions) {
     this.ctx = ctx;
@@ -33,7 +36,14 @@ export class Whiteboard {
 
     requestAnimationFrame(this.draw);
     this.connect();
+    this.fps();
   }
+
+  fps = () => {
+    console.log(this.frameCount);
+    this.frameCount = 0;
+    setTimeout(this.fps, 1000);
+  };
 
   initContext = (ctx: CanvasRenderingContext2D) => {
     ctx.lineWidth = this.lineWidth;
@@ -82,6 +92,11 @@ export class Whiteboard {
     requestAnimationFrame(this.draw);
   };
 
+  setData = (data: Uint8ClampedArray) => {
+    const imgData = new ImageData(data, this.defaultWidth, this.defaultHeight);
+    this.ctx.putImageData(imgData, 0, 0);
+  };
+
   reset = () => {
     this.ctx.reset();
     this.initContext(this.ctx);
@@ -89,8 +104,20 @@ export class Whiteboard {
 
   connect = () => {
     const ws = new WebSocket("ws://localhost:8080");
-    ws.addEventListener("message", (event: MessageEvent) => {
-      console.log(event.data);
+    ws.addEventListener("message", async (event: MessageEvent) => {
+      // console.log(event.data);
+      // const buffer = await (event.data as Blob).arrayBuffer();
+      // const data = new Uint8ClampedArray(buffer);
+      // console.log(data);
+      this.frameCount++;
+    });
+
+    ws.addEventListener("close", (event: CloseEvent) => {
+      console.log("WS connection was closed");
+    });
+
+    setInterval(() => {
+      ws.send("");
     });
   };
 }

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon ./dist/server.js",
+        "dev": "nodemon ./dist/main.js",
         "compile": "tsc --watch",
         "test": "vitest"
     },
