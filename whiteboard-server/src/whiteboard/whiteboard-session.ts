@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { WhiteboardClient } from "./whiteboard-client";
 import type { SessionEvent, SessionEventHandler } from "./types";
 import type { RawData } from "ws";
+import type WebSocket from "ws";
 
 export class WhiteboardSession {
   id: string;
@@ -33,7 +34,8 @@ export class WhiteboardSession {
     });
   };
 
-  addClient = (client: WhiteboardClient): void => {
+  initializeClient = (ws: WebSocket): void => {
+    const client = new WhiteboardClient(ws);
     client.setMessageHandler(this.handleClientMessage);
     this.clients.push(client);
     console.log(`Added client ${client.id} to session ${this.id}`);
