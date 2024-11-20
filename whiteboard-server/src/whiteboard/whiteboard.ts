@@ -6,6 +6,7 @@ import type {
   UserEvent,
   UserEventListener,
   WhiteboardEvent,
+  WhiteboardEventEmitter,
   WhiteboardEventListener,
   WhiteboardState,
 } from "./types";
@@ -14,6 +15,7 @@ export class Whiteboard {
   private users: Map<string, WhiteboardUser>;
   private userEventListeners: Map<string, UserEventListener[]>;
   private whiteboardEventListeners: Map<string, WhiteboardEventListener[]>;
+  private whiteboardEventEmitters: Map<string, WhiteboardEventEmitter[]>;
 
   id: string;
 
@@ -23,6 +25,7 @@ export class Whiteboard {
     this.users = new Map();
     this.userEventListeners = new Map();
     this.whiteboardEventListeners = new Map();
+    this.whiteboardEventEmitters = new Map();
     this.id = randomUUID();
     this.state = {
       counter: 0,
@@ -43,10 +46,20 @@ export class Whiteboard {
 
     for (const listener of listeners) {
       const newState = listener.handleEvent(event, this.state);
+      const whiteboardEvents = new Set<string>();
+      const mutatedKeys = this.getMutatedStateKeys(this.state, newState);
 
-      this.getMutatedStateKeys(this.state, newState).forEach((key) => {
-        // emit whiteboard events based on event emitters
-      });
+      for (const key of mutatedKeys) {
+        const emitters = this.whiteboardEventEmitters.get(key);
+        if (emitters) {
+          for (const emitter of emitters) {
+            const events = emitter.emit(this.state, newState);
+            for (const event of events) {
+              whiteboardEvents.add(event);
+            }
+          }
+        }
+      }
     }
   };
 
