@@ -1,87 +1,88 @@
 import { randomUUID } from "crypto";
-import { WhiteboardUser } from "./whiteboard-user";
+import { WhiteboardClient } from "./whiteboard-client";
 
-import type WebSocket from "ws";
-import type {
-  UserEvent,
-  UserEventListener,
-  WhiteboardEvent,
-  WhiteboardEventEmitter,
-  WhiteboardEventListener,
-  WhiteboardState,
-} from "./types";
+import { ClientAction, ClientMessage, WhiteboardState } from "./types";
+import { EventEmitter } from "./event-emitters/event-emitter";
+
+enum WhiteboardEvent {
+  COUNTER = "counter",
+}
+
+type WhiteboardOptions = {
+  eventEmitter?: EventEmitter;
+  maxPingAttempts?: number;
+  clientPingInterval?: number;
+  maxClients?: number;
+};
 
 export class Whiteboard {
-  private users: Map<string, WhiteboardUser>;
-  private userEventListeners: Map<string, UserEventListener[]>;
-  private whiteboardEventListeners: Map<string, WhiteboardEventListener[]>;
-  private whiteboardEventEmitters: Map<string, WhiteboardEventEmitter[]>;
+  private readonly maxClients: number;
+  private readonly maxPingAttempts: number;
+  private readonly clientPingInterval: number;
+  private clients: Map<string, WhiteboardClient>;
+  private eventEmitter: EventEmitter;
 
   id: string;
 
   state: WhiteboardState;
 
-  constructor() {
-    this.users = new Map();
-    this.userEventListeners = new Map();
-    this.whiteboardEventListeners = new Map();
-    this.whiteboardEventEmitters = new Map();
+  constructor(options?: WhiteboardOptions) {
+    this.maxClients = options?.maxClients || 10;
+    this.maxPingAttempts = options?.maxPingAttempts || 2;
+    this.clientPingInterval = options?.clientPingInterval || 5000;
+    this.eventEmitter = options?.eventEmitter || new EventEmitter();
+    this.clients = new Map();
     this.id = randomUUID();
     this.state = {
       counter: 0,
     };
   }
 
-  handleNewConnection = (ws: WebSocket): void => {
-    const user = new WhiteboardUser(ws);
-    user.addEventListener(this.handleUserEvent);
+  setEventEmitter = (eventEmitter: EventEmitter): void => {
+    this.eventEmitter = eventEmitter;
   };
 
-  handleUserEvent = (event: UserEvent): void => {
-    const listeners = this.userEventListeners.get(event.id);
+  close = (): void => {
+    this.clients.forEach((client, key) => {
+      client.close();
+      this.clients.delete(key);
+    });
+  };
 
-    if (!listeners) {
+  addClient = (client: WhiteboardClient) => {
+    client.onMessage(this.handleClientMessage);
+    this.clients.set(client.id, client);
+    this.pingClient(client);
+  };
+
+  handleClientMessage = (message: ClientMessage): void => {
+    switch (message.action) {
+      // core action handlers
+      case ClientAction.INCREMENT:
+        this.state.counter++;
+        this.eventEmitter.emit(WhiteboardEvent.COUNTER, this.state.counter);
+        break;
+
+      // extra handlers that were injected
+      default:
+        break;
+    }
+  };
+
+  isFull = () => {
+    return this.clients.size >= this.maxClients;
+  };
+
+  pingClient = (client: WhiteboardClient): void => {
+    if (client.pingAttempts === this.maxPingAttempts) {
+      console.log(`Connection to client ${client.id} was lost.`);
+      client.close();
+      this.clients.delete(client.id);
       return;
     }
 
-    for (const listener of listeners) {
-      const newState = listener.handleEvent(event, this.state);
-      const whiteboardEvents = new Set<string>();
-      const mutatedKeys = this.getMutatedStateKeys(this.state, newState);
+    client.ping();
 
-      for (const key of mutatedKeys) {
-        const emitters = this.whiteboardEventEmitters.get(key);
-        if (emitters) {
-          for (const emitter of emitters) {
-            const events = emitter.emit(this.state, newState);
-            for (const event of events) {
-              whiteboardEvents.add(event);
-            }
-          }
-        }
-      }
-    }
-  };
-
-  getMutatedStateKeys = (oldState: any, newState: any): string[] => {
-    const mutatedKeys = [];
-    for (const key in newState) {
-      if (newState[key] !== oldState[key]) {
-        mutatedKeys.push(key);
-      }
-    }
-    return mutatedKeys;
-  };
-
-  handleWhiteboardEvent = (event: WhiteboardEvent): void => {
-    const listeners = this.whiteboardEventListeners.get(event.id);
-
-    if (!listeners) {
-      return;
-    }
-
-    for (const listener of listeners) {
-      listener.handleEvent(event, this);
-    }
+    setTimeout(() => this.pingClient(client), this.clientPingInterval);
   };
 }

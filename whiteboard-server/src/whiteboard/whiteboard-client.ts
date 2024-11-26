@@ -1,27 +1,39 @@
-import type { WebSocket, RawData } from "ws";
 import { randomUUID } from "crypto";
+import type WebSocket from "ws";
+import type { ClientMessage } from "./types";
 
 export class WhiteboardClient {
   id: string;
+  pingAttempts: number;
+  isAlive: boolean;
   private ws: WebSocket;
 
   constructor(ws: WebSocket) {
     this.id = randomUUID();
+    this.pingAttempts = 0;
+    this.isAlive = true;
     this.ws = ws;
   }
 
-  setMessageHandler = (
-    handler: (message: RawData, client: WhiteboardClient) => void,
-  ) => {
-    this.ws.on("message", (message) => handler(message, this));
+  onMessage = (listener: (message: ClientMessage) => void): void => {
+    this.ws.on("message", (data) => {
+      const clientMessage = JSON.parse(data.toString()) as ClientMessage;
+      clientMessage.clientId = this.id;
+      listener(clientMessage);
+    });
+
+    this.ws.on("pong", () => {
+      this.pingAttempts = 0;
+    });
   };
 
-  pushState = (data: Readonly<Uint8ClampedArray>): void => {
-    this.ws.send(data);
+  ping = (): void => {
+    this.ws.ping();
+    this.pingAttempts++;
+    console.log("ping attempts: " + this.pingAttempts);
   };
 
   close = (): void => {
-    console.log(`client ${this.id} closed`);
-    this.ws.terminate();
+    this.ws.close();
   };
 }

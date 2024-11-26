@@ -1,69 +1,43 @@
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
-import { WhiteboardSession } from "./whiteboard-session";
+import { Whiteboard } from "./whiteboard";
 import { WhiteboardClient } from "./whiteboard-client";
 
 const TICK_RATE = 30;
 const FRAME_DURATION_MS = 1000 / TICK_RATE;
 
+type WhiteboardServerOptions = {
+  port: number;
+};
+
 export class WhiteboardServer {
   private isRunning: boolean;
-  private sessions: Map<string, WhiteboardSession>;
+  private sessions: Map<string, Whiteboard>;
   private server: WebSocketServer;
+  private defaultSession: Whiteboard;
 
-  constructor() {
+  constructor(options?: WhiteboardServerOptions) {
     this.isRunning = false;
     this.sessions = new Map();
-    this.server = new WebSocketServer({ port: 8080 });
+    this.server = new WebSocketServer({ port: options?.port || 8080 });
+    this.defaultSession = new Whiteboard();
 
-    this.server.on("connection", this.addClientToSession);
+    this.server.on("connection", this.handleNewConnection);
   }
 
-  addClientToSession = (ws: WebSocket): void => {
+  handleNewConnection = (ws: WebSocket) => {
     const client = new WhiteboardClient(ws);
-
-    if (this.sessions.size === 0) {
-      this.createSession([client]);
-    } else {
-      let id = "";
-      // get first session id in sessions map
-      for (const sessionId of this.sessions.keys()) {
-        if (sessionId) {
-          id = sessionId;
-          break;
-        }
-      }
-      this.sessions.get(id)!.addClient(client);
-    }
+    this.defaultSession.addClient(client);
   };
 
-  start = () => {
-    this.isRunning = true;
-    this.tick();
-  };
-
-  tick = () => {
-    if (this.isRunning) {
-      this.sessions.forEach((session) => {
-        // console.log(`publishing state for session ${session.id}`);
-        session.publishState();
-      });
-      setTimeout(this.tick, FRAME_DURATION_MS);
-    }
-  };
-
-  stop = () => {
-    this.isRunning = false;
-    this.sessions.forEach((session) => {
-      session.close();
-    });
+  close = () => {
+    this.defaultSession.close();
     this.server.close();
   };
 
-  createSession = (clients: WhiteboardClient[]) => {
-    const session = new WhiteboardSession();
-
-    clients.forEach((client) => session.addClient(client));
-    this.sessions.set(session.id, session);
+  /** Adds an event listener that gets called once the server
+   * is ready to accept connections. */
+  onReady = (cb: () => void): void => {
+    this.server.on("listening", cb);
   };
 }

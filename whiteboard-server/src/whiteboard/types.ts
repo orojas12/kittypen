@@ -5,26 +5,19 @@ export type WhiteboardState = {
   counter: number;
 };
 
-export type UserEvent = {
-  id: string;
-  userId: string;
-  data: unknown;
-};
+export enum ClientAction {
+  INCREMENT = "increment",
+}
 
-export type UserEventListener = {
-  eventId: string;
-  handleEvent: (event: UserEvent, state: WhiteboardState) => WhiteboardState;
-};
-
-export type WhiteboardEvent = {
-  id: string;
-  keys: string[];
+export type ClientMessage = {
+  action: string;
+  clientId: string;
   data: unknown;
 };
 
 export type WhiteboardEventListener = {
-  eventId: string;
-  handleEvent: (event: WhiteboardEvent, whiteboard: Whiteboard) => void;
+  event: string;
+  handleEvent: (event: string, state: WhiteboardState) => void;
 };
 
 export type WhiteboardEventEmitter = {
