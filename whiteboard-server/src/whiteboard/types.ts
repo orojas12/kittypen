@@ -10,7 +10,7 @@ export enum ClientAction {
 }
 
 export type ClientMessage = {
-  action: string;
+  event: string;
   clientId: string;
   data: unknown;
 };

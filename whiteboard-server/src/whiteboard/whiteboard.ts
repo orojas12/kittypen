@@ -2,11 +2,17 @@ import { randomUUID } from "crypto";
 import { WhiteboardClient } from "./whiteboard-client";
 
 import { ClientAction, ClientMessage, WhiteboardState } from "./types";
-import { EventEmitter } from "./event-emitters/event-emitter";
+import { EventEmitter } from "events";
 
-enum WhiteboardEvent {
-  COUNTER = "counter",
+function increment(state: WhiteboardState) {
+  state.counter++;
 }
+
+type WhiteboardEventHandler = (state: WhiteboardState) => void;
+
+const WhiteboardEventHandlers = {
+  increment: [increment],
+} as Record<string, WhiteboardEventHandler[] | undefined>;
 
 type WhiteboardOptions = {
   eventEmitter?: EventEmitter;
@@ -56,16 +62,12 @@ export class Whiteboard {
   };
 
   handleClientMessage = (message: ClientMessage): void => {
-    switch (message.action) {
-      // core action handlers
-      case ClientAction.INCREMENT:
-        this.state.counter++;
-        this.eventEmitter.emit(WhiteboardEvent.COUNTER, this.state.counter);
-        break;
+    const handlers = WhiteboardEventHandlers[message.event];
 
-      // extra handlers that were injected
-      default:
-        break;
+    if (handlers) {
+      for (let i = 0; i < handlers.length; i++) {
+        handlers[i](this.state);
+      }
     }
   };
 
