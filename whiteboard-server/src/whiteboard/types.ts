@@ -1,5 +1,4 @@
-import type { Whiteboard } from "./whiteboard";
-import type { WhiteboardSession } from "./whiteboard-session";
+import type { Session } from "./session";
 
 export type WhiteboardState = {
   counter: number;
@@ -33,5 +32,5 @@ export type SessionEvent = {
 
 export type SessionEventHandler = {
   event: string;
-  handleEvent: (event: SessionEvent, session: WhiteboardSession) => void;
+  handleEvent: (event: SessionEvent, session: Session) => void;
 };

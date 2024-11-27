@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import type WebSocket from "ws";
 import type { ClientMessage } from "./types";
 
-export class WhiteboardClient {
+export class Client {
   id: string;
   pingAttempts: number;
   isAlive: boolean;
@@ -13,6 +13,10 @@ export class WhiteboardClient {
     this.pingAttempts = 0;
     this.isAlive = true;
     this.ws = ws;
+
+    this.ws.on("pong", () => {
+      // this.pingAttempts = 0;
+    });
   }
 
   onMessage = (listener: (message: ClientMessage) => void): void => {
@@ -20,10 +24,6 @@ export class WhiteboardClient {
       const clientMessage = JSON.parse(data.toString()) as ClientMessage;
       clientMessage.clientId = this.id;
       listener(clientMessage);
-    });
-
-    this.ws.on("pong", () => {
-      this.pingAttempts = 0;
     });
   };
 
