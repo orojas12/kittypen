@@ -1,6 +1,16 @@
 import { randomUUID } from "crypto";
 import type WebSocket from "ws";
-import type { ClientMessage } from "./types";
+
+export type ClientMessage = {
+  event: string;
+  data: any;
+};
+
+export type ClientMessageListener = (
+  event: string,
+  data: any,
+  client: Client,
+) => void;
 
 export class Client {
   id: string;
@@ -19,11 +29,10 @@ export class Client {
     });
   }
 
-  onMessage = (listener: (message: ClientMessage) => void): void => {
+  onMessage = (listener: ClientMessageListener): void => {
     this.ws.on("message", (data) => {
       const clientMessage = JSON.parse(data.toString()) as ClientMessage;
-      clientMessage.clientId = this.id;
-      listener(clientMessage);
+      listener(clientMessage.event, clientMessage.data, this);
     });
   };
 

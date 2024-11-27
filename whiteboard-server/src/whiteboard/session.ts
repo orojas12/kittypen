@@ -16,6 +16,15 @@ const defaultSessionOptions = {
   maxClients: 10,
 };
 
+export type SessionEventListener = (
+  event: {
+    id: string;
+    data: any;
+  },
+  client: Client,
+  session: Session,
+) => void;
+
 export class Session {
   id: string;
   private whiteboard: Whiteboard;
@@ -39,13 +48,13 @@ export class Session {
   }
 
   addClient = (client: Client) => {
-    client.onMessage(this.handleClientMessage);
+    client.onMessage(this.onClientMessage);
     this.clients.set(client.id, client);
     this.pingClient(client);
   };
 
-  handleClientMessage = (message: ClientMessage): void => {
-    this.eventEmitter.emit(message.event, message);
+  onClientMessage = (event: string, data: any, client: Client): void => {
+    this.eventEmitter.emit(event, data, client, this);
   };
 
   isFull = () => {

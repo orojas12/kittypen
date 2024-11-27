@@ -4,16 +4,6 @@ export type WhiteboardState = {
   counter: number;
 };
 
-export enum ClientAction {
-  INCREMENT = "increment",
-}
-
-export type ClientMessage = {
-  event: string;
-  clientId: string;
-  data: unknown;
-};
-
 export type WhiteboardEventListener = {
   event: string;
   handleEvent: (event: string, state: WhiteboardState) => void;
