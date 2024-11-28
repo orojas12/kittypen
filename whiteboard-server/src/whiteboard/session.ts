@@ -74,7 +74,7 @@ export class Session {
    * subscribed listener.
    */
   onClientEvent = (event: ClientEvent): void => {
-    this.eventEmitter.emit(event.name, event, this);
+    this.eventEmitter.emit(event.type, event, this);
   };
 
   /**

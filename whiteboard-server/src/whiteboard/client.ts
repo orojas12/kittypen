@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import type WebSocket from "ws";
 
 export type ClientEvent = {
-  name: string;
+  type: string;
   data: any;
   client: Client;
 };
