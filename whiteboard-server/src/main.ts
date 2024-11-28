@@ -1,5 +1,5 @@
-import { WhiteboardServer } from "./whiteboard/WhiteboardServer";
+import { Server } from "./whiteboard/server";
 
-const server = new WhiteboardServer();
+import { eventEmitter } from "./whiteboard/config";
 
-server.start();
+const server = new Server({ eventEmitter });

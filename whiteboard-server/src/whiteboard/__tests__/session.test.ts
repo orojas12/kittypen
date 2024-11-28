@@ -4,7 +4,6 @@ import { EventEmitter } from "events";
 
 import { Client } from "../client";
 import { Session } from "../session";
-import { Whiteboard } from "../whiteboard";
 
 vi.mock("ws");
 
@@ -13,7 +12,8 @@ test("terminates dead connections", async () => {
     maxPingAttempts: 2,
     pingInterval: 50,
   };
-  const session = new Session(new Whiteboard(), new EventEmitter(), options);
+  const session = new Session(new EventEmitter(), options);
+  // mocked websocket won't respond to pings
   const ws = new WebSocket(null);
   const client = new Client(ws);
 

@@ -1,16 +1,13 @@
 import { randomUUID } from "crypto";
 import type WebSocket from "ws";
 
-export type ClientMessage = {
-  event: string;
+export type ClientEvent = {
+  name: string;
   data: any;
+  client: Client;
 };
 
-export type ClientMessageListener = (
-  event: string,
-  data: any,
-  client: Client,
-) => void;
+export type ClientEventListener = (event: ClientEvent) => void;
 
 export class Client {
   id: string;
@@ -25,14 +22,19 @@ export class Client {
     this.ws = ws;
 
     this.ws.on("pong", () => {
-      // this.pingAttempts = 0;
+      this.pingAttempts = 0;
     });
   }
 
-  onMessage = (listener: ClientMessageListener): void => {
+  send = (data: any) => {
+    this.ws.send(JSON.stringify(data));
+  };
+
+  onEvent = (listener: ClientEventListener): void => {
     this.ws.on("message", (data) => {
-      const clientMessage = JSON.parse(data.toString()) as ClientMessage;
-      listener(clientMessage.event, clientMessage.data, this);
+      const clientEvent = JSON.parse(data.toString()) as ClientEvent;
+      clientEvent.client = this;
+      listener(clientEvent);
     });
   };
 

@@ -5,26 +5,38 @@ import { Client } from "./client";
 import { Session } from "./session";
 import { Whiteboard } from "./whiteboard";
 
-const TICK_RATE = 30;
-const FRAME_DURATION_MS = 1000 / TICK_RATE;
-
-type WhiteboardServerOptions = {
+export type ServerOptions = {
   port: number;
+  eventEmitter: EventEmitter;
+};
+
+const DEFAULT_SERVER_OPTIONS = {
+  port: 8080,
+  eventEmitter: new EventEmitter(),
 };
 
 export class Server {
-  private isRunning: boolean;
   private sessions: Map<string, Whiteboard>;
   private server: WebSocketServer;
   private defaultSession: Session;
+  private options: ServerOptions;
 
-  constructor(options?: WhiteboardServerOptions) {
-    this.isRunning = false;
+  constructor(options?: Partial<ServerOptions>) {
+    this.options = {
+      ...DEFAULT_SERVER_OPTIONS,
+      ...options,
+    };
     this.sessions = new Map();
-    this.server = new WebSocketServer({ port: options?.port || 8080 });
-    this.defaultSession = new Session(new Whiteboard(), new EventEmitter());
+
+    this.server = new WebSocketServer({
+      port: this.options.port,
+    });
+
+    this.defaultSession = new Session(this.options.eventEmitter);
 
     this.server.on("connection", this.onConnection);
+
+    console.log("Server listening on port " + this.options.port);
   }
 
   onConnection = (ws: WebSocket) => {
@@ -35,11 +47,5 @@ export class Server {
   close = () => {
     this.defaultSession.close();
     this.server.close();
-  };
-
-  /** Adds an event listener that gets called once the server
-   * is ready to accept connections. */
-  onReady = (cb: () => void): void => {
-    this.server.on("listening", cb);
   };
 }

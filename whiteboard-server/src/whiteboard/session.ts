@@ -1,66 +1,92 @@
 import { randomUUID } from "crypto";
-import type { Whiteboard } from "./whiteboard";
-import { Client } from "./client";
-import { ClientMessage } from "./types";
 import EventEmitter from "events";
 
-type WhiteboardSessionOptions = {
+import { Canvas } from "./canvas";
+import { Client, ClientEvent } from "./client";
+
+export type SessionOptions = {
   maxPingAttempts: number;
   pingInterval: number;
   maxClients: number;
 };
 
-const defaultSessionOptions = {
+export type ClientEventListener = (
+  event: ClientEvent,
+  session: Session,
+) => void;
+
+export type SessionState = {
+  canvas: Canvas;
+  counter: number;
+};
+
+const DEFAULT_SESSION_OPTIONS = {
   maxPingAttempts: 2,
   pingInterval: 5000,
   maxClients: 10,
 };
 
-export type SessionEventListener = (
-  event: {
-    id: string;
-    data: any;
-  },
-  client: Client,
-  session: Session,
-) => void;
-
 export class Session {
   id: string;
-  private whiteboard: Whiteboard;
+  state: SessionState;
   private clients: Map<string, Client>;
   private eventEmitter: EventEmitter;
-  private readonly options: WhiteboardSessionOptions;
+  private readonly options: SessionOptions;
 
   constructor(
-    whiteboard: Whiteboard,
     eventEmitter: EventEmitter,
-    options?: Partial<WhiteboardSessionOptions>,
+    options?: Partial<SessionOptions>,
+    state?: SessionState,
   ) {
     this.id = randomUUID();
     this.clients = new Map();
-    this.whiteboard = whiteboard;
+    this.state = state || {
+      counter: 0,
+      canvas: new Canvas(),
+    };
     this.eventEmitter = eventEmitter;
     this.options = {
-      ...defaultSessionOptions,
+      ...DEFAULT_SESSION_OPTIONS,
       ...options,
     };
   }
 
+  /**
+   * Broadcast this session's state to all clients.
+   */
+  broadcast = () => {
+    this.clients.forEach((client) => {
+      client.send(this.state);
+    });
+  };
+
+  /**
+   * Adds a new websocket client to this session.
+   */
   addClient = (client: Client) => {
-    client.onMessage(this.onClientMessage);
+    client.onEvent(this.onClientEvent);
     this.clients.set(client.id, client);
     this.pingClient(client);
   };
 
-  onClientMessage = (event: string, data: any, client: Client): void => {
-    this.eventEmitter.emit(event, data, client, this);
+  /**
+   * Handles incoming client events by passing each event to its
+   * subscribed listener.
+   */
+  onClientEvent = (event: ClientEvent): void => {
+    this.eventEmitter.emit(event.name, event, this);
   };
 
+  /**
+   * Returns true if this session has reached its max number of clients allowed.
+   */
   isFull = () => {
     return this.clients.size >= this.options.maxClients;
   };
 
+  /**
+   * Recursively pings a websocket client and closes it if the connection is lost.
+   */
   pingClient = (client: Client): void => {
     if (client.pingAttempts === this.options.maxPingAttempts) {
       console.log(`Connection to client ${client.id} was lost.`);
