@@ -1,10 +1,11 @@
-import type { ClientEventListener } from "../session";
+import { EventListener } from "../event-emitter";
 
-let onIncrement: ClientEventListener;
+let onIncrement: EventListener;
 
 onIncrement = function (event, session) {
   session.state.counter++;
-  session.broadcast();
+  console.log("Broadcasting event...");
+  session.broadcast("counter", session.state.counter);
 };
 
 export default onIncrement;

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import EventEmitter from "events";
+import { EventEmitter } from "./event-emitter";
 
 import { Canvas } from "./canvas";
 import { Client, ClientEvent } from "./client";
@@ -10,14 +10,15 @@ export type SessionOptions = {
   maxClients: number;
 };
 
-export type ClientEventListener = (
-  event: ClientEvent,
-  session: Session,
-) => void;
-
 export type SessionState = {
   canvas: Canvas;
   counter: number;
+};
+
+export type SessionEvent = {
+  type: string;
+  data: any;
+  session: string;
 };
 
 const DEFAULT_SESSION_OPTIONS = {
@@ -52,11 +53,15 @@ export class Session {
   }
 
   /**
-   * Broadcast this session's state to all clients.
+   * Broadcasts event to all clients.
    */
-  broadcast = () => {
+  broadcast = (event: string, data: any) => {
     this.clients.forEach((client) => {
-      client.send(this.state);
+      client.send({
+        type: event,
+        data: data,
+        session: this.id,
+      } as SessionEvent);
     });
   };
 
@@ -74,7 +79,7 @@ export class Session {
    * subscribed listener.
    */
   onClientEvent = (event: ClientEvent): void => {
-    this.eventEmitter.emit(event.type, event, this);
+    this.eventEmitter.emit(event, this);
   };
 
   /**

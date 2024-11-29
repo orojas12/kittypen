@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "./event-emitter";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
 import { Client } from "./client";
