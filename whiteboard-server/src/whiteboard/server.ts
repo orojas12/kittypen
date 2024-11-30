@@ -1,9 +1,8 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "./event-emitter";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
 import { Client } from "./client";
 import { Session } from "./session";
-import { Whiteboard } from "./whiteboard";
 
 export type ServerOptions = {
   port: number;
@@ -16,7 +15,6 @@ const DEFAULT_SERVER_OPTIONS = {
 };
 
 export class Server {
-  private sessions: Map<string, Whiteboard>;
   private server: WebSocketServer;
   private defaultSession: Session;
   private options: ServerOptions;
@@ -26,7 +24,6 @@ export class Server {
       ...DEFAULT_SERVER_OPTIONS,
       ...options,
     };
-    this.sessions = new Map();
 
     this.server = new WebSocketServer({
       port: this.options.port,

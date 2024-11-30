@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import type WebSocket from "ws";
+import type { SessionEvent } from "./session";
 
 export type ClientEvent = {
   type: string;
@@ -26,7 +27,7 @@ export class Client {
     });
   }
 
-  send = (data: any) => {
+  send = (data: SessionEvent) => {
     this.ws.send(JSON.stringify(data));
   };
 
@@ -41,7 +42,6 @@ export class Client {
   ping = (): void => {
     this.ws.ping();
     this.pingAttempts++;
-    console.log("ping attempts: " + this.pingAttempts);
   };
 
   close = (): void => {

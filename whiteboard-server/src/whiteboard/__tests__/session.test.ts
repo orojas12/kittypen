@@ -1,11 +1,13 @@
 import { test, expect, vi } from "vitest";
-import WebSocket from "ws";
-import { EventEmitter } from "events";
+import { EventEmitter } from "../event-emitter";
 
 import { Client } from "../client";
 import { Session } from "../session";
 
-vi.mock("ws");
+const mockWs = {
+  on: vi.fn(),
+  ping: vi.fn(),
+};
 
 test("terminates dead connections", async () => {
   const options = {
@@ -13,9 +15,7 @@ test("terminates dead connections", async () => {
     pingInterval: 50,
   };
   const session = new Session(new EventEmitter(), options);
-  // mocked websocket won't respond to pings
-  const ws = new WebSocket(null);
-  const client = new Client(ws);
+  const client = new Client(mockWs as any);
 
   client.close = vi.fn();
 
@@ -31,5 +31,40 @@ test("terminates dead connections", async () => {
       }
       resolve();
     }, 200);
+  });
+});
+
+test("broadcasts events", async () => {
+  const eventEmitter = new EventEmitter();
+
+  eventEmitter.on("event1", (event, session) => {
+    expect(event.type).toEqual("event1");
+    expect(event.data).toEqual(1);
+    session.broadcast("event2", 2);
+  });
+
+  const session = new Session(eventEmitter);
+  const client1 = new Client(mockWs as any);
+  const client2 = new Client(mockWs as any);
+
+  client1.send = vi.fn();
+  client2.send = vi.fn();
+
+  session.addClient(client1);
+  session.addClient(client2);
+
+  session.onClientEvent({ type: "event1", data: 1, client: client1 });
+
+  expect(client1.send).toBeCalledTimes(1);
+  expect(client1.send).toBeCalledWith({
+    type: "event2",
+    data: 2,
+    session: session.id,
+  });
+  expect(client2.send).toBeCalledTimes(1);
+  expect(client2.send).toBeCalledWith({
+    type: "event2",
+    data: 2,
+    session: session.id,
   });
 });
