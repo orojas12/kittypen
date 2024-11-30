@@ -1,3 +1,13 @@
+export type Rgba = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
+const DEFAULT_WIDTH = 100;
+const DEFAULT_HEIGHT = 100;
+
 /**
  * Data representation of an HTML canvas element.
  *
@@ -14,14 +24,15 @@
    four values is the second pixel.
  */
 export class Canvas {
-  private width = 100;
-  private height = 100;
-  private data = new Uint8ClampedArray(this.width * this.height * 4);
+  private width: number;
+  private height: number;
+  private data: Uint8ClampedArray;
 
   constructor(width?: number, height?: number, data?: Uint8ClampedArray) {
-    this.width = width || this.width;
-    this.height = height || this.height;
-    this.data = data?.slice() || this.data;
+    this.width = width || DEFAULT_WIDTH;
+    this.height = height || DEFAULT_HEIGHT;
+    this.data =
+      data?.slice() || new Uint8ClampedArray(this.width * this.height * 4);
   }
 
   drawLine = (
@@ -29,7 +40,7 @@ export class Canvas {
     startY: number,
     endX: number,
     endY: number,
-    rgba?: [number, number, number, number],
+    rgba: Rgba,
   ): void => {
     const dx = endX - startX;
     const dy = endY - startY;
@@ -41,17 +52,18 @@ export class Canvas {
         this.drawPixel(
           Math.round(startX + i * stepX),
           Math.round(startY + i * stepY),
+          rgba,
         );
       }
     }
   };
 
-  drawPixel = (x: number, y: number): void => {
+  drawPixel = (x: number, y: number, rgba: Rgba): void => {
     const index = (x + y * this.width) * 4;
-    this.data[index] = 0; // red
-    this.data[index + 1] = 0; // green
-    this.data[index + 2] = 0; // blue
-    this.data[index + 3] = 1; // alpha
+    this.data[index] = rgba.r; // red
+    this.data[index + 1] = rgba.g; // green
+    this.data[index + 2] = rgba.b; // blue
+    this.data[index + 3] = rgba.a; // alpha
   };
 
   /**
