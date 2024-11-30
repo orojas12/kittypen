@@ -94,7 +94,6 @@ export class Session {
    */
   pingClient = (client: Client): void => {
     if (client.pingAttempts === this.options.maxPingAttempts) {
-      console.log(`Connection to client ${client.id} was lost.`);
       client.close();
       this.clients.delete(client.id);
       return;

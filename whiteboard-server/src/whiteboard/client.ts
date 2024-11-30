@@ -33,7 +33,6 @@ export class Client {
 
   onEvent = (listener: ClientEventListener): void => {
     this.ws.on("message", (data) => {
-      console.log("Received message: " + data);
       const clientEvent = JSON.parse(data.toString()) as ClientEvent;
       clientEvent.client = this;
       listener(clientEvent);
@@ -41,7 +40,6 @@ export class Client {
   };
 
   ping = (): void => {
-    console.log("Pinging client " + this.id);
     this.ws.ping();
     this.pingAttempts++;
   };
