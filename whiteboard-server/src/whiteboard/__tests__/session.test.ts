@@ -44,17 +44,25 @@ test("broadcasts events", async () => {
   });
 
   const session = new Session(eventEmitter);
-  const client = new Client(mockWs as any);
+  const client1 = new Client(mockWs as any);
+  const client2 = new Client(mockWs as any);
 
-  client.id = "client1";
-  client.send = vi.fn();
+  client1.send = vi.fn();
+  client2.send = vi.fn();
 
-  session.addClient(client);
+  session.addClient(client1);
+  session.addClient(client2);
 
-  session.onClientEvent({ type: "event1", data: 1, client });
+  session.onClientEvent({ type: "event1", data: 1, client: client1 });
 
-  expect(client.send).toBeCalledTimes(1);
-  expect(client.send).toBeCalledWith({
+  expect(client1.send).toBeCalledTimes(1);
+  expect(client1.send).toBeCalledWith({
+    type: "event2",
+    data: 2,
+    session: session.id,
+  });
+  expect(client2.send).toBeCalledTimes(1);
+  expect(client2.send).toBeCalledWith({
     type: "event2",
     data: 2,
     session: session.id,
