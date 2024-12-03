@@ -66,6 +66,10 @@ export class Canvas {
     this.data[index + 3] = rgba.a; // alpha
   };
 
+  reset = (): void => {
+    this.data = new Uint8ClampedArray(this.width * this.height * 4);
+  };
+
   /**
    * Returns a copy of the underlying Uint8ClampedArray representing canvas data.
    */

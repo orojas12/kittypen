@@ -43,7 +43,7 @@ export class Session {
     this.clients = new Map();
     this.state = state || {
       counter: 0,
-      canvas: new Canvas(),
+      canvas: new Canvas(4, 4),
     };
     this.eventEmitter = eventEmitter;
     this.options = {

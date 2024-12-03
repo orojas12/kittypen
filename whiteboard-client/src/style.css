@@ -49,4 +49,5 @@ body {
 #canvas {
   aspect-ratio: 1;
   width: 720px;
+  image-rendering: pixelated;
 }
