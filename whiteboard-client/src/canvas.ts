@@ -30,7 +30,7 @@ export class Canvas {
 
     this.ws.onopen = (_) => {
       console.log("Established connection to server");
-      // setInterval(this.drawRandom, 2000);
+      setInterval(this.drawRandom, 2000);
     };
 
     this.ws.addEventListener("message", this.handleMessage);

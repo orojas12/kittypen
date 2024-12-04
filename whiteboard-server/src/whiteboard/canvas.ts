@@ -45,7 +45,9 @@ export class Canvas {
     const dx = endX - startX;
     const dy = endY - startY;
     const step = Math.max(Math.abs(dx), Math.abs(dy));
-    if (step !== 0) {
+    if (step === 0) {
+      this.drawPixel(startX, startY, rgba);
+    } else {
       const stepX = dx / step;
       const stepY = dy / step;
       for (let i = 0; i < step + 1; i++) {
