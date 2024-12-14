@@ -11,6 +11,7 @@ const DEFAULT_HEIGHT = 100;
 /**
  * Data representation of an HTML canvas element.
  *
+ *
    Each pixel in the canvas is represented by four values in an 8-bit
    unsigned integer array. Each value represents a component of rgba
    data (red, green, blue, or alpha)

@@ -12,7 +12,6 @@ export type SessionOptions = {
 
 export type SessionState = {
   canvas: Canvas;
-  counter: number;
 };
 
 export type SessionEvent = {
@@ -36,14 +35,13 @@ export class Session {
 
   constructor(
     eventEmitter: EventEmitter,
-    options?: Partial<SessionOptions>,
     state?: SessionState,
+    options?: Partial<SessionOptions>,
   ) {
     this.id = randomUUID();
     this.clients = new Map();
     this.state = state || {
-      counter: 0,
-      canvas: new Canvas(4, 4),
+      canvas: new Canvas(),
     };
     this.eventEmitter = eventEmitter;
     this.options = {

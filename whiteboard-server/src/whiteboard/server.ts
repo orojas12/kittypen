@@ -3,6 +3,7 @@ import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
 import { Client } from "./client";
 import { Session } from "./session";
+import { Canvas } from "./canvas";
 
 export type ServerOptions = {
   port: number;
@@ -29,7 +30,9 @@ export class Server {
       port: this.options.port,
     });
 
-    this.defaultSession = new Session(this.options.eventEmitter);
+    this.defaultSession = new Session(this.options.eventEmitter, {
+      canvas: new Canvas(100, 100),
+    });
 
     this.server.on("connection", this.onConnection);
 

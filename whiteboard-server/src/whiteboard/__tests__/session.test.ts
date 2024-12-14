@@ -14,7 +14,7 @@ test("terminates dead connections", async () => {
     maxPingAttempts: 2,
     pingInterval: 50,
   };
-  const session = new Session(new EventEmitter(), options);
+  const session = new Session(new EventEmitter(), undefined, options);
   const client = new Client(mockWs as any);
 
   client.close = vi.fn();

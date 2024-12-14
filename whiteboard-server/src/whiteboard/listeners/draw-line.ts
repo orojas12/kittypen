@@ -11,13 +11,17 @@ type Line = {
   rgba: Rgba;
 };
 
-const canvasDataToBase64 = (arr: Uint8ClampedArray): string => {
-  return btoa(String.fromCharCode(...arr));
+export const canvasDataToBase64 = (bytes: Uint8ClampedArray): string => {
+  const str = bytes.reduce(
+    (acc, current) => acc + String.fromCharCode(current),
+    "",
+  );
+
+  return btoa(str);
 };
 
 drawLine = (event, session) => {
   const data = event.data as Line;
-  session.state.canvas.reset();
   session.state.canvas.drawLine(
     data.startX,
     data.startY,
