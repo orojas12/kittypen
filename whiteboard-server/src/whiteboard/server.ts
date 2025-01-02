@@ -31,7 +31,7 @@ export class Server {
     });
 
     this.defaultSession = new Session(this.options.eventEmitter, {
-      canvas: new Canvas(100, 100),
+      canvas: new Canvas(1000, 1000),
     });
 
     this.server.on("connection", this.onConnection);

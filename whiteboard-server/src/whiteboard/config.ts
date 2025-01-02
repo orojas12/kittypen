@@ -1,8 +1,8 @@
 import { EventEmitter } from "./event-emitter";
-import drawLine from "./listeners/draw-line";
+import updateCanvas from "./listeners/updateCanvas";
 
 const eventEmitter = new EventEmitter();
 
-eventEmitter.on("drawLine", drawLine);
+eventEmitter.on("updateCanvas", updateCanvas);
 
 export { eventEmitter };

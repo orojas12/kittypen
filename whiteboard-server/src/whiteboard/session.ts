@@ -53,13 +53,15 @@ export class Session {
   /**
    * Broadcasts event to all clients.
    */
-  broadcast = (event: string, data: any) => {
+  broadcast = (event: string, data: any, options?: { exclude: string[] }) => {
     this.clients.forEach((client) => {
-      client.send({
-        type: event,
-        data: data,
-        session: this.id,
-      } as SessionEvent);
+      if (!options?.exclude.includes(client.id)) {
+        client.send({
+          type: event,
+          data: data,
+          session: this.id,
+        } as SessionEvent);
+      }
     });
   };
 

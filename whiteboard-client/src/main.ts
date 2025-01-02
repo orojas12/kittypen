@@ -1,5 +1,5 @@
 import "./style.css";
-import { Canvas } from "./canvas";
+import { Canvas } from "./canvas/canvas";
 
 const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
 
@@ -7,9 +7,8 @@ if (canvasElement === null) {
   throw Error("Canvas is null");
 }
 
-const canvas = new Canvas(canvasElement, undefined, {
-  width: 100,
-  height: 100,
-});
+const ctx = canvasElement.getContext("2d") as CanvasRenderingContext2D;
+
+const canvas = new Canvas(ctx, { width: 1000, height: 1000 });
 
 const resetBtn = document.getElementById("reset") as HTMLButtonElement;

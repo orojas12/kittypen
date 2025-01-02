@@ -79,4 +79,11 @@ export class Canvas {
   getData = (): Uint8ClampedArray => {
     return this.data.slice();
   };
+
+  /**
+   * Sets the underlying canvas data
+   */
+  putData = (data: Uint8ClampedArray): void => {
+    this.data = data.slice();
+  };
 }
