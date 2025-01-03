@@ -5,6 +5,7 @@ export default class AppMessageBinaryEncoder {
   PAYLOAD_HEADER_BYTE_LENGTH = 4;
 
   utf8Encoder = new TextEncoder();
+  utf8Decoder = new TextDecoder();
 
   encode = (message: AppMessage): ArrayBuffer => {
     // get event utf8 bytes
@@ -43,5 +44,33 @@ export default class AppMessageBinaryEncoder {
     return view.buffer;
   };
 
-  decode = (bytes: ArrayBuffer): AppMessage => {};
+  decode = (bytes: ArrayBuffer): AppMessage => {
+    const view = new DataView(bytes);
+    const message = {} as AppMessage;
+    let bufPos = 0;
+
+    // extract event header
+    const eventByteLength = view.getInt16(bufPos);
+    bufPos += 2;
+
+    // extract event
+    const eventBytes = new Uint8Array(eventByteLength);
+    for (let i = 0; i < eventByteLength; i++) {
+      eventBytes[i] = view.getUint8(bufPos++);
+    }
+    message.event = this.utf8Decoder.decode(eventBytes);
+
+    // extract payload header
+    const payloadByteLength = view.getUint32(bufPos);
+    bufPos += 4;
+
+    // extract payload
+    const payload = new Uint8Array(payloadByteLength);
+    for (let i = 0; i < payloadByteLength; i++) {
+      payload[i] = view.getUint8(bufPos++);
+    }
+    message.payload = payload;
+
+    return message;
+  };
 }
