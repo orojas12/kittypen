@@ -1,16 +1,14 @@
 package dev.oscarrojas.whiteboard;
 
+import dev.oscarrojas.whiteboard.canvas.Canvas;
+import dev.oscarrojas.whiteboard.ws.AppMessage;
+import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.WebSocketSession;
-
-import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessage;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 
 public class AppSession {
 
@@ -19,8 +17,7 @@ public class AppSession {
   private AppMessageBinaryEncoder encoder;
   private Map<String, WebSocketSession> connections = new HashMap<>();
 
-  public AppSession() {
-  }
+  public AppSession() {}
 
   public AppSession(String id, Canvas canvas, AppMessageBinaryEncoder encoder) {
     this.id = id;

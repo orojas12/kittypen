@@ -2,16 +2,17 @@ package dev.oscarrojas.whiteboard.ws.protocol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import dev.oscarrojas.whiteboard.ws.AppMessage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
 import org.junit.jupiter.api.Test;
 
 public class AppMessageBinaryEncoderTest {
 
   @Test
   void encode() {
-    String event = "myEvent";
+    String channel = "myChannel";
+    String action = "myAction";
     byte[] payload = new byte[8];
     payload[0] = (byte) 219;
     payload[1] = (byte) 109;
@@ -22,7 +23,7 @@ public class AppMessageBinaryEncoderTest {
     payload[6] = (byte) 182;
     payload[7] = (byte) 219;
     AppMessageBinaryEncoder encoder = new AppMessageBinaryEncoder();
-    AppMessage message = new AppMessage(event, payload);
+    AppMessage message = new AppMessage(channel, action, payload);
 
     byte[] result = encoder.encode(message);
     ByteBuffer buffer = ByteBuffer.wrap(result);
@@ -31,14 +32,23 @@ public class AppMessageBinaryEncoderTest {
       System.out.print((int) (result[i] & 0xFF) + " ");
     }
 
-    // event header equals event byte length
-    short eventByteLength = buffer.getShort();
-    assertEquals(event.getBytes(StandardCharsets.UTF_8).length, eventByteLength);
+    // channel header equals channel byte length
+    short channelByteLength = buffer.getShort();
+    assertEquals(channel.getBytes(StandardCharsets.UTF_8).length, channelByteLength);
 
-    // event bytes equals message event
-    byte[] eventBytes = new byte[eventByteLength];
-    buffer.get(eventBytes, 0, eventByteLength);
-    assertEquals(event, new String(eventBytes, StandardCharsets.UTF_8));
+    // channel bytes equals message channel
+    byte[] channelBytes = new byte[channelByteLength];
+    buffer.get(channelBytes, 0, channelByteLength);
+    assertEquals(channel, new String(channelBytes, StandardCharsets.UTF_8));
+
+    // action header equals action byte length
+    short actionByteLength = buffer.getShort();
+    assertEquals(action.getBytes(StandardCharsets.UTF_8).length, actionByteLength);
+
+    // action bytes equals message action
+    byte[] actionBytes = new byte[actionByteLength];
+    buffer.get(actionBytes, 0, actionByteLength);
+    assertEquals(action, new String(actionBytes, StandardCharsets.UTF_8));
 
     // payload header equals payload byte length
     int payloadByteLength = buffer.getInt();
@@ -57,7 +67,8 @@ public class AppMessageBinaryEncoderTest {
 
   @Test
   void decode() throws BinaryDecodingException {
-    String event = "myEvent";
+    String channel = "myChannel";
+    String action = "myAction";
     byte[] payload = new byte[8];
     payload[0] = (byte) 219;
     payload[1] = (byte) 109;
@@ -68,12 +79,15 @@ public class AppMessageBinaryEncoderTest {
     payload[6] = (byte) 182;
     payload[7] = (byte) 219;
     AppMessageBinaryEncoder encoder = new AppMessageBinaryEncoder();
-    byte[] encodedMsg = encoder.encode(new AppMessage(event, payload));
+    byte[] encodedMsg = encoder.encode(new AppMessage(channel, action, payload));
 
     AppMessage decodedMsg = encoder.decode(encodedMsg);
 
-    // decoded event equals original event
-    assertEquals(event, decodedMsg.getEvent());
+    // decoded channel equals original channel
+    assertEquals(channel, decodedMsg.getChannel());
+
+    // decoded action equals original action
+    assertEquals(action, decodedMsg.getAction());
 
     // decoded payload equals original payload
     byte[] decodedPayload = decodedMsg.getPayload();
