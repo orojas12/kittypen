@@ -1,12 +1,10 @@
 package dev.oscarrojas.whiteboard;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
-
 import dev.oscarrojas.whiteboard.canvas.Canvas;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
 
 @Service
 public class AppSessionService {
@@ -28,6 +26,10 @@ public class AppSessionService {
     return sessionDao.getByConnectionId(connectionId);
   }
 
+  public void saveSession(AppSession session) {
+    sessionDao.save(session);
+  }
+
   public void registerConnection(WebSocketSession conn) {
     Optional<AppSession> sessionOpt = getSession(defaultSessionId);
     AppSession session;
@@ -41,5 +43,4 @@ public class AppSessionService {
     session.addConnection(conn);
     sessionDao.save(session);
   }
-
 }
