@@ -1,5 +1,6 @@
 package dev.oscarrojas.whiteboard.canvas;
 
+import dev.oscarrojas.whiteboard.exception.InvalidInputException;
 import java.util.UUID;
 
 public class Canvas {
@@ -10,7 +11,7 @@ public class Canvas {
   private String id = UUID.randomUUID().toString();
   private int width;
   private int height;
-  private UnsignedByteArray data;
+  private byte[] data;
 
   public Canvas() {
     this.width = DEFAULT_WIDTH;
@@ -20,13 +21,13 @@ public class Canvas {
   public Canvas(int width, int height) {
     this.width = width;
     this.height = height;
-    this.data = new UnsignedByteArray(width * height * 4);
+    this.data = new byte[width * height * 4];
   }
 
-  public Canvas(int width, int height, UnsignedByteArray data) {
+  public Canvas(int width, int height, byte[] data) {
     this.width = width;
     this.height = height;
-    this.data = new UnsignedByteArray(data);
+    this.data = new byte[data.length];
   }
 
   String getId() {
@@ -37,44 +38,20 @@ public class Canvas {
     this.id = id;
   }
 
-  void putData(UnsignedByteArray array) {
+  void putData(byte[] array) throws InvalidInputException {
+    if (array.length != width * height * 4) {
+      throw new InvalidInputException("Input array does not match required size");
+    }
     data = array;
   }
 
-  void drawLine(int startX, int startY, int endX, int endY, Rgba rgba) {
-    int dx = endX - startX;
-    int dy = endY - startY;
-    int step = Math.max(Math.abs(dx), Math.abs(dy));
-
-    if (step == 0) {
-      drawPixel(startX, startY, rgba);
-    } else {
-      float stepX = (float) dx / step;
-      float stepY = (float) dy / step;
-      for (int i = 0; i < step + 1; i++) {
-        int x = Math.round(startX + i * stepX);
-        int y = Math.round(startY + i * stepY);
-        drawPixel(x, y, rgba);
-      }
-    }
-  }
-
-  void drawPixel(int x, int y, Rgba rgba) {
-    int index = (y * width + x) * 4;
-    data.set(index, rgba.getRed());
-    data.set(index + 1, rgba.getBlue());
-    data.set(index + 2, rgba.getGreen());
-    data.set(index + 3, rgba.getAlpha());
-  }
-
   void reset() {
-    for (int i = 0; i < data.size(); i++) {
-      data.set(i, 0);
+    for (int i = 0; i < data.length; i++) {
+      data[i] = 0;
     }
   }
 
-  UnsignedByteArray getData() {
+  byte[] getData() {
     return data;
   }
-
 }
