@@ -1,6 +1,7 @@
 package dev.oscarrojas.whiteboard.ws;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppMessageBroker {
 
-  private Map<String, LinkedList<AppMessageConsumer>> channels;
+  private Map<String, LinkedList<AppMessageConsumer>> channels = new HashMap<>();
 
   public void subscribe(AppMessageConsumer consumer) {
     for (String channel : consumer.getChannels()) {
