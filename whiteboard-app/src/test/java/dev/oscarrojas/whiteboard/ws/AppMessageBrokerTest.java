@@ -12,18 +12,30 @@ class AppMessageBrokerTest {
   void subscribeAndPublish() {
     AppMessageBroker broker = new AppMessageBroker();
 
-    MessageConsumer consumer = mock(MessageConsumer.class);
-    when(consumer.getChannels()).thenReturn(List.of("channel1"));
+    MessageConsumer consumer1 = mock(MessageConsumer.class);
+    MessageConsumer consumer2 = mock(MessageConsumer.class);
+    MessageConsumer consumer3 = mock(MessageConsumer.class);
+    when(consumer1.getChannels()).thenReturn(List.of("channel1"));
+    when(consumer2.getChannels()).thenReturn(List.of("channel2"));
+    when(consumer3.getChannels()).thenReturn(List.of("channel1"));
 
-    broker.subscribe(consumer);
-    AppMessage msg = new AppMessage("channel1", "action1", new byte[] {0});
-    broker.publish("channel1", msg, "");
+    broker.subscribe(consumer1);
+    broker.subscribe(consumer2);
+    broker.subscribe(consumer3);
+    AppMessage msg1 = new AppMessage("channel1", "action1", new byte[] {0});
+    AppMessage msg2 = new AppMessage("channel2", "action2", new byte[] {0});
 
-    verify(consumer, times(1)).receiveMessage(msg, "");
+    broker.publish("channel1", msg1, "");
 
-    broker.publish("channel0", msg, "");
+    verify(consumer1, times(1)).receiveMessage(msg1, "");
+    verify(consumer2, never()).receiveMessage(any(), any());
+    verify(consumer3, times(1)).receiveMessage(msg1, "");
 
-    verify(consumer, times(1)).receiveMessage(msg, "");
+    broker.publish("channel2", msg2, "");
+
+    verify(consumer1, times(1)).receiveMessage(msg1, "");
+    verify(consumer2, times(1)).receiveMessage(msg2, "");
+    verify(consumer3, times(1)).receiveMessage(msg1, "");
   }
 
   class MessageConsumer implements AppMessageConsumer {
