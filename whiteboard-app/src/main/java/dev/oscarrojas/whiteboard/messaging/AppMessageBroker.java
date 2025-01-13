@@ -1,26 +1,23 @@
 package dev.oscarrojas.whiteboard.messaging;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
-@Component
 public class AppMessageBroker {
 
-  private Map<String, LinkedList<AppMessageConsumer>> channels = new HashMap<>();
+  private final Map<String, LinkedList<AppMessageConsumer>> channels = new HashMap<>();
 
-  public void subscribe(AppMessageConsumer consumer) {
-    for (String channel : consumer.getChannels()) {
-      LinkedList<AppMessageConsumer> consumers = channels.get(channel);
+  public void subscribe(String channel, AppMessageConsumer consumer) {
+    LinkedList<AppMessageConsumer> consumers = channels.get(channel);
 
-      if (consumers == null) {
-        channels.put(channel, new LinkedList<>(Arrays.asList(consumer)));
-      } else {
-        consumers.add(consumer);
-      }
+    if (consumers == null) {
+      channels.put(channel, new LinkedList<>(Collections.singletonList(consumer)));
+    } else {
+      consumers.add(consumer);
     }
   }
 
@@ -33,7 +30,18 @@ public class AppMessageBroker {
     }
 
     for (AppMessageConsumer consumer : consumers) {
-      consumer.receiveMessage(message, connectionId);
+      for (AppMessageConsumer.ActionMethod actionMethod : consumer.getActionMethods()) {
+        if (actionMethod.action.equals(message.getAction())) {
+          try {
+            actionMethod.method.invoke(consumer, message, connectionId);
+          } catch (IllegalAccessException e) {
+            // TODO: proper error logging
+            throw new RuntimeException(e);
+          } catch (InvocationTargetException e) {
+            System.out.println(e.getCause().getMessage());
+          }
+        }
+      }
     }
   }
 }

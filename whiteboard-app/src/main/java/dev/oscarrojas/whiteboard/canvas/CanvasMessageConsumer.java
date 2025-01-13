@@ -5,34 +5,24 @@ import dev.oscarrojas.whiteboard.AppSessionService;
 import dev.oscarrojas.whiteboard.exception.InvalidInputException;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
+import dev.oscarrojas.whiteboard.messaging.annotation.Action;
+import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CanvasMessageConsumer implements AppMessageConsumer {
+@Channel("canvas")
+public class CanvasMessageConsumer extends AppMessageConsumer {
 
-  private AppSessionService sessionService;
+  private final AppSessionService sessionService;
 
   public CanvasMessageConsumer(AppSessionService sessionService) {
     this.sessionService = sessionService;
   }
 
-  @Override
-  public List<String> getChannels() {
-    return Collections.singletonList("canvas");
-  }
-
-  @Override
-  public void receiveMessage(AppMessage message, String connectionId) {
-    switch (message.getAction()) {
-      case "update" -> update(message, connectionId);
-      default -> {}
-    }
-  }
-
+  @Action("update")
   private void update(AppMessage message, String connectionId) {
     Optional<AppSession> sessionOpt = sessionService.getSessionForConnection(connectionId);
 
