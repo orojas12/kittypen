@@ -1,4 +1,4 @@
-package dev.oscarrojas.whiteboard.ws;
+package dev.oscarrojas.whiteboard.messaging;
 
 import java.util.List;
 

@@ -3,13 +3,15 @@ package dev.oscarrojas.whiteboard.canvas;
 import dev.oscarrojas.whiteboard.AppSession;
 import dev.oscarrojas.whiteboard.AppSessionService;
 import dev.oscarrojas.whiteboard.exception.InvalidInputException;
-import dev.oscarrojas.whiteboard.ws.AppMessage;
-import dev.oscarrojas.whiteboard.ws.AppMessageConsumer;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CanvasMessageConsumer implements AppMessageConsumer {
 
   private AppSessionService sessionService;

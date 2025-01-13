@@ -1,8 +1,10 @@
 package dev.oscarrojas.whiteboard.ws;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
+import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

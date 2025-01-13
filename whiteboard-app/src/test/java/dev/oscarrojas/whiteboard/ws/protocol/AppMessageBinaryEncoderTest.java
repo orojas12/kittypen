@@ -2,7 +2,7 @@ package dev.oscarrojas.whiteboard.ws.protocol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import dev.oscarrojas.whiteboard.ws.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;

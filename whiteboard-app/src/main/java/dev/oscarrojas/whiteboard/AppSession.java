@@ -1,7 +1,7 @@
 package dev.oscarrojas.whiteboard;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.ws.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import java.io.IOException;
 import java.util.HashMap;

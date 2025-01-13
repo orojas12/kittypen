@@ -3,7 +3,7 @@ package dev.oscarrojas.whiteboard;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import dev.oscarrojas.whiteboard.ws.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.ws.WebSocketMessageHandler;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import org.junit.jupiter.api.Test;

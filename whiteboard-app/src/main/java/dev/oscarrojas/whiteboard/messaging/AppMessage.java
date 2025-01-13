@@ -1,4 +1,4 @@
-package dev.oscarrojas.whiteboard.ws;
+package dev.oscarrojas.whiteboard.messaging;
 
 public class AppMessage {
 

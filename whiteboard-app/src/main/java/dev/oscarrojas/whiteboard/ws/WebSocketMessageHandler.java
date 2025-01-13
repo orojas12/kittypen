@@ -2,6 +2,8 @@ package dev.oscarrojas.whiteboard.ws;
 
 import dev.oscarrojas.whiteboard.AppSession;
 import dev.oscarrojas.whiteboard.AppSessionService;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import java.util.Optional;
 import org.springframework.stereotype.Component;

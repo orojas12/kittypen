@@ -1,6 +1,6 @@
 package dev.oscarrojas.whiteboard.ws.protocol;
 
-import dev.oscarrojas.whiteboard.ws.AppMessage;
+import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Component;

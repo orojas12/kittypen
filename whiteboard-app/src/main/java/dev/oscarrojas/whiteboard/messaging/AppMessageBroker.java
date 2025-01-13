@@ -1,9 +1,10 @@
-package dev.oscarrojas.whiteboard.ws;
+package dev.oscarrojas.whiteboard.messaging;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,6 +24,7 @@ public class AppMessageBroker {
     }
   }
 
+  @Async
   public void publish(String channel, AppMessage message, String connectionId) {
     LinkedList<AppMessageConsumer> consumers = channels.get(channel);
 
