@@ -1,41 +1,42 @@
 package dev.oscarrojas.whiteboard.messaging;
 
 import dev.oscarrojas.whiteboard.messaging.annotation.Action;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AppMessageConsumer {
 
-  private final List<ActionMethod> actionMethods;
+    private final List<ConsumerMethod> consumerMethods;
 
-  public AppMessageConsumer() {
-    List<ActionMethod> methods = new ArrayList<>();
+    public AppMessageConsumer() {
+        List<ConsumerMethod> methods = new ArrayList<>();
 
-    for (Method method : this.getClass().getDeclaredMethods()) {
-      Action action = method.getAnnotation(Action.class);
+        for (Method method : this.getClass().getDeclaredMethods()) {
+            Action action = method.getAnnotation(Action.class);
 
-      if (action == null) {
-        continue;
-      }
+            if (action == null) {
+                continue;
+            }
 
-      methods.add(new ActionMethod(action.value(), method));
+            methods.add(new ConsumerMethod(action.value(), method));
+        }
+
+        this.consumerMethods = methods;
     }
 
-    this.actionMethods = methods;
-  }
-
-  public Iterable<ActionMethod> getActionMethods() {
-    return actionMethods;
-  }
-
-  public static class ActionMethod {
-    public String action;
-    public Method method;
-
-    ActionMethod(String action, Method method) {
-      this.action = action;
-      this.method = method;
+    public Iterable<ConsumerMethod> getConsumerMethods() {
+        return consumerMethods;
     }
-  }
+
+    public static class ConsumerMethod {
+        public String action;
+        public Method method;
+
+        ConsumerMethod(String action, Method method) {
+            this.action = action;
+            this.method = method;
+        }
+    }
 }
