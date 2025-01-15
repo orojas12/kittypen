@@ -1,21 +1,18 @@
 package dev.oscarrojas.whiteboard;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class InMemoryAppSessionDao implements AppSessionDao {
 
-  private Map<String, AppSession> sessions = new HashMap<>();
+  private Map<String, AppSession> sessions = new ConcurrentHashMap<>();
 
   @Override
   public Optional<AppSession> get(String id) {
-
     return Optional.ofNullable(sessions.get(id));
-
   }
 
   @Override
@@ -30,7 +27,6 @@ public class InMemoryAppSessionDao implements AppSessionDao {
     }
 
     return Optional.ofNullable(session);
-
   }
 
   @Override
@@ -38,5 +34,4 @@ public class InMemoryAppSessionDao implements AppSessionDao {
     assert session.getId() != null;
     sessions.put(session.getId(), session);
   }
-
 }
