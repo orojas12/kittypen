@@ -24,15 +24,8 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
     }
 
     @Action("update")
-    private void update(AppMessage message, String connectionId) {
-        Optional<AppSession> sessionOpt = sessionService.getSessionForConnection(connectionId);
-
-        if (sessionOpt.isEmpty()) {
-            return;
-        }
-
-        AppSession session = sessionOpt.get();
     private void update(AppMessage message, WebSocketSession ws) {
+        AppSession session = sessionService.getSession(ws);
         Canvas canvas = session.getCanvas();
 
         // update message's timestamp is older than canvas' most recent update
