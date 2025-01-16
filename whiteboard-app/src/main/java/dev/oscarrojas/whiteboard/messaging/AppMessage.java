@@ -1,40 +1,54 @@
 package dev.oscarrojas.whiteboard.messaging;
 
+import java.time.Instant;
+
 public class AppMessage {
 
-  private String channel;
-  private String action;
-  private byte[] payload;
+    private Instant timestamp;
+    private String channel;
+    private String action;
+    private byte[] payload;
 
-  public AppMessage() {}
+    public AppMessage() {
+        this.timestamp = Instant.ofEpochMilli(Instant.now().toEpochMilli());
+    }
 
-  public AppMessage(String channel, String action, byte[] payload) {
-    this.channel = channel;
-    this.action = action;
-    this.payload = payload;
-  }
+    public AppMessage(String channel, String action, byte[] payload) {
+        this.timestamp = Instant.ofEpochMilli(Instant.now().toEpochMilli());
+        this.channel = channel;
+        this.action = action;
+        this.payload = payload;
+    }
 
-  public String getChannel() {
-    return channel;
-  }
+    public Instant getTimestamp() {
+        return timestamp;
+    }
 
-  public void setChannel(String channel) {
-    this.channel = channel;
-  }
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
 
-  public String getAction() {
-    return action;
-  }
+    public String getChannel() {
+        return channel;
+    }
 
-  public void setAction(String event) {
-    this.action = event;
-  }
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
 
-  public byte[] getPayload() {
-    return payload;
-  }
+    public String getAction() {
+        return action;
+    }
 
-  public void setPayload(byte[] payload) {
-    this.payload = payload;
-  }
+    public void setAction(String event) {
+        this.action = event;
+    }
+
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    public void setPayload(byte[] payload) {
+        this.payload = payload;
+    }
 }
