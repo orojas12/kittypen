@@ -8,10 +8,10 @@ import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
 import dev.oscarrojas.whiteboard.messaging.annotation.Action;
 import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
 
 @Component
 @Channel("canvas")
@@ -32,6 +32,7 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
         }
 
         AppSession session = sessionOpt.get();
+    private void update(AppMessage message, WebSocketSession ws) {
         Canvas canvas = session.getCanvas();
 
         // update message's timestamp is older than canvas' most recent update
@@ -44,16 +45,16 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
         try {
             canvas.putData(message.getPayload());
         } catch (InvalidInputException e) {
-            // TODO: figure out how to send error message
+            // TODO: figure out a good way to send error message
             return;
         }
 
+        canvas.setLastUpdated(message.getTimestamp());
         sessionService.saveSession(session);
-
         AppMessage appMessage = new AppMessage("canvas", "update", canvas.getData());
 
         try {
-            session.broadcastMessage(appMessage, Collections.singletonList(connectionId));
+            session.broadcastMessage(appMessage, Collections.singletonList(ws.getId()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

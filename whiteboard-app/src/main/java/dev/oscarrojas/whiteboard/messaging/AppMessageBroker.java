@@ -2,6 +2,7 @@ package dev.oscarrojas.whiteboard.messaging;
 
 import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -54,7 +55,10 @@ public class AppMessageBroker {
 
     @Async
     public Future<Void> publish(
-        String channel, AppMessage message, String connectionId) {
+        String channel,
+        AppMessage message,
+        WebSocketSession ws
+    ) {
         LinkedList<AppMessageConsumer> consumers = channels.get(channel);
 
         if (consumers == null) {
@@ -73,8 +77,8 @@ public class AppMessageBroker {
                         for (int i = 0; i < params.length; i++) {
                             if (params[i].getType() == AppMessage.class) {
                                 args[i] = message;
-                            } else if (params[i].getType() == String.class) {
-                                args[i] = connectionId;
+                            } else if (params[i].getType() == WebSocketSession.class) {
+                                args[i] = ws;
                             }
                         }
 
