@@ -24,7 +24,7 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
     }
 
     @Action("update")
-    private void update(AppMessage message, WebSocketSession ws) {
+    public void update(AppMessage message, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
         Canvas canvas = session.getCanvas();
 
@@ -39,7 +39,7 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
             canvas.putData(message.getPayload());
         } catch (InvalidInputException e) {
             // TODO: figure out a good way to send error message
-            return;
+            throw new RuntimeException(e);
         }
 
         canvas.setLastUpdated(message.getTimestamp());

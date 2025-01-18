@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class InMemoryAppSessionDao implements AppSessionDao {
 
-    private Map<String, AppSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, AppSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public Optional<AppSession> get(String id) {
@@ -41,7 +41,6 @@ public class InMemoryAppSessionDao implements AppSessionDao {
 
     @Override
     public void save(AppSession session) {
-        assert session.getId() != null;
-        sessions.put(session.getId(), session);
+        sessions.put(session.getId(), new AppSession(session));
     }
 }

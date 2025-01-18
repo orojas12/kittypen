@@ -40,6 +40,7 @@ public class AppSessionService {
         } else {
             session = findAvailableSession();
             session.addConnection(ws);
+            sessionDao.save(session);
         }
 
         return session;
@@ -53,17 +54,25 @@ public class AppSessionService {
      * @return An available session that a new connection may be added to.
      */
     private AppSession findAvailableSession() {
-        List<AppSession> nonFullSessions = sessionDao.getAllByConnectionCountRange(1, 9);
+        List<AppSession> nonFullSessions = sessionDao.getAllByConnectionCountRange(0, 9);
 
-        AppSession optimalSession = new AppSession(
-            UUID.randomUUID().toString(),
-            new Canvas(),
-            encoder
-        );
+        AppSession optimalSession = null;
+
         for (AppSession session : nonFullSessions) {
-            if (session.getConnectionCount() > optimalSession.getConnectionCount()) {
+            // prioritize sessions that are closer to full
+            if (optimalSession == null
+                || session.getConnectionCount() > optimalSession.getConnectionCount()
+            ) {
                 optimalSession = session;
             }
+        }
+
+        if (optimalSession == null) {
+            optimalSession = new AppSession(
+                UUID.randomUUID().toString(),
+                new Canvas(),
+                encoder
+            );
         }
 
         return optimalSession;
@@ -72,7 +81,7 @@ public class AppSessionService {
     /**
      * Saves the session's current state
      *
-     * @param session
+     * @param session the AppSession to save
      */
     public void saveSession(AppSession session) {
         sessionDao.save(session);

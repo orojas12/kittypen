@@ -18,13 +18,28 @@ public class AppSession {
     private AppMessageBinaryEncoder encoder;
     private Map<String, WebSocketSession> connections = new HashMap<>();
 
-    public AppSession() {
-    }
-
     public AppSession(String id, Canvas canvas, AppMessageBinaryEncoder encoder) {
         this.id = id;
         this.canvas = canvas;
         this.encoder = encoder;
+    }
+
+    public AppSession(
+        String id, Canvas canvas,
+        Map<String, WebSocketSession> connections, AppMessageBinaryEncoder encoder
+    ) {
+        this.id = id;
+        this.canvas = canvas;
+        this.connections = new HashMap<>(connections);
+        this.encoder = encoder;
+
+    }
+
+    public AppSession(AppSession session) {
+        this.id = session.getId();
+        this.canvas = new Canvas(session.getCanvas());
+        this.connections = new HashMap<>(session.getConnections());
+        this.encoder = session.getEncoder();
     }
 
     public String getId() {
@@ -39,8 +54,12 @@ public class AppSession {
         return canvas;
     }
 
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
+    public AppMessageBinaryEncoder getEncoder() {
+        return encoder;
+    }
+
+    public Map<String, WebSocketSession> getConnections() {
+        return connections;
     }
 
     public void addConnection(WebSocketSession conn) {

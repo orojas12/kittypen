@@ -5,6 +5,7 @@ import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -47,7 +48,7 @@ class AppMessageBrokerIT {
         Future<Void> future = broker.publish(
             "mockChannel",
             new AppMessage("mockChannel", "mockAction", new byte[0]),
-            ""
+            new StandardWebSocketSession(null, null, null, null)
         );
 
         future.get();

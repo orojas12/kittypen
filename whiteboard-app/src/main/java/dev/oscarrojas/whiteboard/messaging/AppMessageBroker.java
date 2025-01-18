@@ -102,7 +102,7 @@ public class AppMessageBroker {
 
             Parameter[] params = consumerMethod.method.getParameters();
             int messageCount = 0;
-            int idCount = 0;
+            int wsCount = 0;
 
             for (Parameter param : params) {
                 if (param.getType() == AppMessage.class &&
@@ -110,10 +110,10 @@ public class AppMessageBroker {
                 ) {
                     messageCount++;
                     continue;
-                } else if (param.getType() == String.class &&
-                    idCount == 0
+                } else if (param.getType() == WebSocketSession.class &&
+                    wsCount == 0
                 ) {
-                    idCount++;
+                    wsCount++;
                     continue;
                 } else {
                     throw new RuntimeException(String.format(

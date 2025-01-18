@@ -3,12 +3,13 @@ package dev.oscarrojas.whiteboard.canvas;
 import dev.oscarrojas.whiteboard.exception.InvalidInputException;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class Canvas {
 
-    private final int DEFAULT_WIDTH = 1000;
-    private final int DEFAULT_HEIGHT = 1000;
+    private final int DEFAULT_WIDTH = 1;
+    private final int DEFAULT_HEIGHT = 1;
 
     private String id = UUID.randomUUID().toString();
     private int width;
@@ -19,6 +20,7 @@ public class Canvas {
     public Canvas() {
         this.width = DEFAULT_WIDTH;
         this.height = DEFAULT_HEIGHT;
+        this.data = new byte[width * height * 4];
         this.lastUpdated = Instant.now();
     }
 
@@ -34,6 +36,14 @@ public class Canvas {
         this.height = height;
         this.data = new byte[data.length];
         this.lastUpdated = Instant.now();
+    }
+
+    public Canvas(Canvas canvas) {
+        this.id = canvas.getId();
+        this.width = canvas.width;
+        this.height = canvas.height;
+        this.data = Arrays.copyOf(canvas.getData(), canvas.getData().length);
+        this.lastUpdated = Instant.ofEpochMilli(Instant.now().toEpochMilli());
     }
 
     String getId() {
@@ -52,12 +62,10 @@ public class Canvas {
     }
 
     void reset() {
-        for (int i = 0; i < data.length; i++) {
-            data[i] = 0;
-        }
+        Arrays.fill(data, (byte) 0);
     }
 
-    byte[] getData() {
+    public byte[] getData() {
         return data;
     }
 
