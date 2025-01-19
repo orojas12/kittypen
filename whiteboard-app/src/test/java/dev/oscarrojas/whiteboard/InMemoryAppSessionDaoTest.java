@@ -1,6 +1,7 @@
 package dev.oscarrojas.whiteboard;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
+import dev.oscarrojas.whiteboard.exception.NotFoundException;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.WebSocketSession;
@@ -71,6 +72,23 @@ class InMemoryAppSessionDaoTest {
         assertTrue(session1Copy.isPresent());
         assertNotSame(session1, session1Copy.get());
         assertFalse(session1Copy.get().hasConnection(ws1.getId()));
+
+    }
+
+    @Test
+    void delete_deletesSession() throws NotFoundException {
+        AppSessionDao dao = new InMemoryAppSessionDao();
+        AppSession session1 = new AppSession(
+            UUID.randomUUID().toString(), new Canvas(1, 1),
+            encoder
+        );
+        dao.save(session1);
+        session1 = dao.get(session1.getId()).get();
+
+        dao.delete(session1.getId());
+        Optional<AppSession> opt = dao.get(session1.getId());
+
+        assertTrue(opt.isEmpty());
 
     }
 

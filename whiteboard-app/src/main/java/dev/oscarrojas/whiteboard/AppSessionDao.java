@@ -1,5 +1,7 @@
 package dev.oscarrojas.whiteboard;
 
+import dev.oscarrojas.whiteboard.exception.NotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,5 +20,7 @@ public interface AppSessionDao {
     List<AppSession> getAllByConnectionCountRange(int min, int max);
 
     void save(AppSession session);
+
+    void delete(String sessionId) throws NotFoundException;
 
 }

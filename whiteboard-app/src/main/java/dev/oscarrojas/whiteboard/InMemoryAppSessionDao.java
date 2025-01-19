@@ -1,5 +1,6 @@
 package dev.oscarrojas.whiteboard;
 
+import dev.oscarrojas.whiteboard.exception.NotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -42,5 +43,20 @@ public class InMemoryAppSessionDao implements AppSessionDao {
     @Override
     public void save(AppSession session) {
         sessions.put(session.getId(), new AppSession(session));
+    }
+
+    @Override
+    public void delete(String sessionId) throws NotFoundException {
+        AppSession session = sessions.remove(sessionId);
+        if (session == null) {
+            throw new NotFoundException(String.format(
+                "App session '%s' does not exist",
+                sessionId
+            ));
+        }
+    }
+
+    public void deleteAll() {
+        sessions.clear();
     }
 }
