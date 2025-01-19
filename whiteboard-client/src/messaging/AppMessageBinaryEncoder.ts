@@ -1,15 +1,15 @@
 import type { AppMessage } from "./types";
 
-export default class AppMessageBinaryEncoder {
-  CHANNEL_HEADER_BYTE_LENGTH = 2;
-  ACTION_HEADER_BYTE_LENGTH = 2;
-  PAYLOAD_HEADER_BYTE_LENGTH = 4;
+export const EPOCH_MILLISECOND_BYTES = 8;
+export const CHANNEL_HEADER_BYTES = 1;
+export const ACTION_HEADER_BYTES = 1;
+export const PAYLOAD_HEADER_BYTES = 4;
 
+export default class AppMessageBinaryEncoder {
   utf8Encoder = new TextEncoder();
   utf8Decoder = new TextDecoder();
 
   encode = (message: AppMessage): ArrayBuffer => {
-    // get event utf8 bytes
     const channelBytes: Uint8Array = this.utf8Encoder.encode(message.channel);
     const actionBytes: Uint8Array = this.utf8Encoder.encode(message.action);
     const payloadBytes = new Uint8Array(message.payload);
@@ -17,20 +17,24 @@ export default class AppMessageBinaryEncoder {
     // create buffer
     const view = new DataView(
       new ArrayBuffer(
-        this.CHANNEL_HEADER_BYTE_LENGTH +
+        EPOCH_MILLISECOND_BYTES +
+          CHANNEL_HEADER_BYTES +
           channelBytes.length +
-          this.ACTION_HEADER_BYTE_LENGTH +
+          ACTION_HEADER_BYTES +
           actionBytes.length +
-          this.PAYLOAD_HEADER_BYTE_LENGTH +
+          PAYLOAD_HEADER_BYTES +
           payloadBytes.length,
       ),
     );
 
     let bytePos = 0;
 
+    // write timestamp
+    view.setBigUint64(bytePos, BigInt(message.timestamp));
+    bytePos += 8;
+
     // write channel header
-    view.setUint16(bytePos, channelBytes.length);
-    bytePos += 2;
+    view.setUint8(bytePos++, channelBytes.length);
 
     // write channel bytes
     for (let i = 0; i < channelBytes.length; i++) {
@@ -38,8 +42,7 @@ export default class AppMessageBinaryEncoder {
     }
 
     // write action header
-    view.setUint16(bytePos, actionBytes.length);
-    bytePos += 2;
+    view.setUint8(bytePos++, actionBytes.length);
 
     // write action bytes
     for (let i = 0; i < actionBytes.length; i++) {
@@ -63,9 +66,12 @@ export default class AppMessageBinaryEncoder {
     const message = {} as AppMessage;
     let bufPos = 0;
 
+    // extract timestamp
+    message.timestamp = Number(view.getBigUint64(bufPos));
+    bufPos += 8;
+
     // extract channel header
-    const channelByteLength = view.getInt16(bufPos);
-    bufPos += 2;
+    const channelByteLength = view.getUint8(bufPos++);
 
     // extract channel
     const channelBytes = new Uint8Array(channelByteLength);
@@ -75,8 +81,7 @@ export default class AppMessageBinaryEncoder {
     message.channel = this.utf8Decoder.decode(channelBytes);
 
     // extract action header
-    const actionByteLength = view.getInt16(bufPos);
-    bufPos += 2;
+    const actionByteLength = view.getUint8(bufPos++);
 
     // extract channel
     const actionBytes = new Uint8Array(actionByteLength);
