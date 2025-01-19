@@ -8,34 +8,31 @@ import java.util.UUID;
 
 public class Canvas {
 
-    private final int DEFAULT_WIDTH = 1;
-    private final int DEFAULT_HEIGHT = 1;
+    private final int DEFAULT_WIDTH = 4;
+    private final int DEFAULT_HEIGHT = 4;
 
     private String id = UUID.randomUUID().toString();
     private int width;
     private int height;
     private byte[] data;
-    private Instant lastUpdated;
+    private Instant lastUpdated = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
     public Canvas() {
         this.width = DEFAULT_WIDTH;
         this.height = DEFAULT_HEIGHT;
         this.data = new byte[width * height * 4];
-        this.lastUpdated = Instant.now();
     }
 
     public Canvas(int width, int height) {
         this.width = width;
         this.height = height;
         this.data = new byte[width * height * 4];
-        this.lastUpdated = Instant.now();
     }
 
     public Canvas(int width, int height, byte[] data) {
         this.width = width;
         this.height = height;
         this.data = new byte[data.length];
-        this.lastUpdated = Instant.now();
     }
 
     public Canvas(Canvas canvas) {
@@ -43,7 +40,7 @@ public class Canvas {
         this.width = canvas.width;
         this.height = canvas.height;
         this.data = Arrays.copyOf(canvas.getData(), canvas.getData().length);
-        this.lastUpdated = Instant.ofEpochMilli(Instant.now().toEpochMilli());
+        this.lastUpdated = canvas.getLastUpdated();
     }
 
     String getId() {
