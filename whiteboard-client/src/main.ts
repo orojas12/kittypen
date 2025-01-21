@@ -9,6 +9,6 @@ if (canvasElement === null) {
 
 const ctx = canvasElement.getContext("2d") as CanvasRenderingContext2D;
 
-const canvas = new Canvas(ctx, { width: 1000, height: 1000 });
+const canvas = new Canvas(ctx, { width: 4, height: 4 });
 
 const resetBtn = document.getElementById("reset") as HTMLButtonElement;

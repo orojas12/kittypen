@@ -1,3 +1,6 @@
+import AppMessageBinaryEncoder from "../messaging/AppMessageBinaryEncoder";
+import { AppMessage } from "../messaging/types";
+
 export type CanvasOptions = {
   width: number;
   height: number;
@@ -10,11 +13,6 @@ export type CanvasPointer = {
   prevX: number;
   prevY: number;
   isPressed: boolean;
-};
-
-export type CanvasEvent = {
-  type: string;
-  data: any;
 };
 
 const DEFAULT_CANVAS_OPTIONS = {
@@ -30,12 +28,15 @@ export class Canvas {
   private synced: boolean;
   private syncInterval: NodeJS.Timeout;
   private pointer: CanvasPointer;
+  private encoder: AppMessageBinaryEncoder;
 
   constructor(ctx: CanvasRenderingContext2D, options?: Partial<CanvasOptions>) {
     this.options = {
       ...DEFAULT_CANVAS_OPTIONS,
       ...options,
     };
+
+    this.encoder = new AppMessageBinaryEncoder();
 
     this.pointer = {
       x: 0,
@@ -75,10 +76,17 @@ export class Canvas {
     });
 
     ws.addEventListener("message", (event) => {
-      const message = JSON.parse(event.data) as CanvasEvent;
-      console.log("message", message);
-      if (message.type === "updateCanvas") {
-        this.ctx.putImageData(this.base64ToCanvasData(message.data), 0, 0);
+      const message = this.encoder.decode(event.data);
+      console.log(message);
+      if (message.channel === "canvas" && message.action === "update") {
+        this.ctx.putImageData(
+          new ImageData(
+            new Uint8ClampedArray(message.payload),
+            this.options.width,
+          ),
+          0,
+          0,
+        );
       }
     });
 
@@ -111,10 +119,6 @@ export class Canvas {
       this.pointer.x = Math.round(this.options.width * scaleX);
       this.pointer.y = Math.round(this.options.height * scaleY);
     }
-
-    if (this.pointer.isPressed) {
-      this.synced = false;
-    }
   };
 
   draw = (): void => {
@@ -127,6 +131,7 @@ export class Canvas {
   updateFrame = (): void => {
     if (this.pointer.isPressed) {
       this.draw();
+      this.synced = false;
     }
     requestAnimationFrame(this.updateFrame);
   };
@@ -136,38 +141,21 @@ export class Canvas {
 
     console.log("Syncing data...");
 
-    const bytes = this.ctx.getImageData(
+    const array = this.ctx.getImageData(
       0,
       0,
       this.options.width,
       this.options.height,
     ).data;
 
-    this.ws.send(
-      JSON.stringify({
-        type: "updateCanvas",
-        data: this.canvasDataToBase64(bytes),
-      }),
-    );
+    const message = {
+      timestamp: Date.now(),
+      channel: "canvas",
+      action: "update",
+      payload: array.buffer,
+    } as AppMessage;
 
+    this.ws.send(this.encoder.encode(message));
     this.synced = true;
-  };
-
-  base64ToCanvasData = (base64: string): ImageData => {
-    console.log("base64: " + base64);
-    const arr = Uint8ClampedArray.from(atob(base64), (char) =>
-      char.charCodeAt(0),
-    );
-    console.log("uint8array: ", arr);
-
-    return new ImageData(arr, this.options.width, this.options.height);
-  };
-
-  canvasDataToBase64 = (bytes: Uint8ClampedArray): string => {
-    const str = bytes.reduce(
-      (acc, value) => acc + String.fromCharCode(value),
-      "",
-    );
-    return btoa(str);
   };
 }

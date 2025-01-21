@@ -1,29 +1,29 @@
 package dev.oscarrojas.whiteboard.config;
 
-import java.util.List;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.BinaryWebSocketHandler;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-  private List<TextWebSocketHandler> webSocketHandlers;
+    private List<BinaryWebSocketHandler> webSocketHandlers;
 
-  WebSocketConfig(List<TextWebSocketHandler> webSocketHandlers) {
-    this.webSocketHandlers = webSocketHandlers;
-  }
-
-  @Override
-  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-
-    for (TextWebSocketHandler handler : webSocketHandlers) {
-      registry.addHandler(handler, "/");
+    WebSocketConfig(List<BinaryWebSocketHandler> webSocketHandlers) {
+        this.webSocketHandlers = webSocketHandlers;
     }
-  }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+
+        for (BinaryWebSocketHandler handler : webSocketHandlers) {
+            registry.addHandler(handler, "/").setAllowedOrigins("http://localhost:5173");
+        }
+    }
 
 }
