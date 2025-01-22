@@ -15,7 +15,8 @@ public class InMemoryAppSessionDao implements AppSessionDao {
 
     @Override
     public Optional<AppSession> get(String id) {
-        return Optional.ofNullable(sessions.get(id));
+        AppSession session = sessions.get(id);
+        return session == null ? Optional.empty() : Optional.of(new AppSession(session));
     }
 
     @Override
@@ -29,7 +30,7 @@ public class InMemoryAppSessionDao implements AppSessionDao {
             }
         }
 
-        return Optional.ofNullable(session);
+        return session == null ? Optional.empty() : Optional.of(new AppSession(session));
     }
 
     @Override
@@ -37,7 +38,7 @@ public class InMemoryAppSessionDao implements AppSessionDao {
         return sessions.values().stream().filter((session) -> {
             int connections = session.getConnectionCount();
             return connections >= min && connections <= max;
-        }).toList();
+        }).map(AppSession::new).toList();
     }
 
     @Override
