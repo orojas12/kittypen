@@ -8,20 +8,11 @@ import java.util.UUID;
 
 public class Canvas {
 
-    private final int DEFAULT_WIDTH = 4;
-    private final int DEFAULT_HEIGHT = 4;
-
     private String id = UUID.randomUUID().toString();
     private int width;
     private int height;
     private byte[] data;
     private Instant lastUpdated = Instant.ofEpochMilli(Instant.now().toEpochMilli());
-
-    public Canvas() {
-        this.width = DEFAULT_WIDTH;
-        this.height = DEFAULT_HEIGHT;
-        this.data = new byte[width * height * 4];
-    }
 
     public Canvas(int width, int height) {
         this.width = width;
