@@ -31,13 +31,11 @@ export class Canvas {
   private encoder: AppMessageBinaryEncoder;
 
   constructor(ctx: CanvasRenderingContext2D, options?: Partial<CanvasOptions>) {
+    this.encoder = new AppMessageBinaryEncoder();
     this.options = {
       ...DEFAULT_CANVAS_OPTIONS,
       ...options,
     };
-
-    this.encoder = new AppMessageBinaryEncoder();
-
     this.pointer = {
       x: 0,
       y: 0,
@@ -60,6 +58,7 @@ export class Canvas {
   }
 
   setUpContext = (ctx: CanvasRenderingContext2D): CanvasRenderingContext2D => {
+    ctx.imageSmoothingEnabled = false;
     ctx.canvas.width = this.options.width;
     ctx.canvas.height = this.options.height;
     ctx.lineWidth = this.options.lineWidth;
@@ -70,24 +69,24 @@ export class Canvas {
 
   establishServerConnection = (): WebSocket => {
     const ws = new WebSocket("ws://localhost:8080");
+    ws.binaryType = "arraybuffer";
 
     ws.addEventListener("open", (event) => {
       console.log("Connection established with ws://localhost:8080");
     });
 
     ws.addEventListener("message", (event) => {
-      const message = this.encoder.decode(event.data);
-      console.log(message);
-      if (message.channel === "canvas" && message.action === "update") {
-        this.ctx.putImageData(
-          new ImageData(
-            new Uint8ClampedArray(message.payload),
-            this.options.width,
-          ),
-          0,
-          0,
-        );
-      }
+      const message = this.encoder.decode(event.data) as AppMessage;
+      console.log(
+        `received message: {\ntimestamp: ${message.timestamp} \nchannel: ${message.channel}, \naction: ${message.action}, \npayload: ${message.payload}`,
+      );
+
+      const imgData = new ImageData(
+        new Uint8ClampedArray(message.payload),
+        this.options.width,
+      );
+
+      this.ctx.putImageData(imgData, 0, 0);
     });
 
     return ws;
@@ -116,8 +115,8 @@ export class Canvas {
       const scaleX = this.pointer.x / domRect.width;
       const scaleY = this.pointer.y / domRect.height;
 
-      this.pointer.x = Math.round(this.options.width * scaleX);
-      this.pointer.y = Math.round(this.options.height * scaleY);
+      this.pointer.x = Math.trunc(this.options.width * scaleX) + 0.5;
+      this.pointer.y = Math.trunc(this.options.height * scaleY) + 0.5;
     }
   };
 
@@ -148,14 +147,15 @@ export class Canvas {
       this.options.height,
     ).data;
 
-    const message = {
-      timestamp: Date.now(),
-      channel: "canvas",
-      action: "update",
-      payload: array.buffer,
-    } as AppMessage;
+    this.ws.send(
+      this.encoder.encode({
+        timestamp: Date.now(),
+        channel: "canvas",
+        action: "update",
+        payload: array,
+      }),
+    );
 
-    this.ws.send(this.encoder.encode(message));
     this.synced = true;
   };
 }
