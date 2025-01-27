@@ -87,7 +87,9 @@ public class AppSession {
                 continue;
             }
 
-            trySendMessage(connection, binaryMessage);
+            if (connection.isOpen()) {
+                trySendMessage(connection, binaryMessage);
+            }
         }
     }
 
@@ -100,7 +102,11 @@ public class AppSession {
 
         BinaryMessage binaryMessage = new BinaryMessage(encoder.encode(message));
 
-        trySendMessage(connection, binaryMessage);
+        if (connection.isOpen()) {
+            trySendMessage(connection, binaryMessage);
+        } else {
+            WebSocketSession ws = removeConnection(connection);
+        }
     }
 
     public WebSocketSession removeConnection(WebSocketSession ws) {
@@ -111,7 +117,7 @@ public class AppSession {
         try {
             ws.sendMessage(message);
         } catch (IOException e) {
-            WebSocketSession removed = connections.remove(ws.getId());
+            WebSocketSession removed = removeConnection(ws);
             if (removed.isOpen()) {
                 try {
                     removed.close(CloseStatus.SERVER_ERROR);
