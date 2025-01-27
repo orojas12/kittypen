@@ -1,6 +1,8 @@
 package dev.oscarrojas.whiteboard;
 
 import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
+import dev.oscarrojas.whiteboard.session.AppSession;
+import dev.oscarrojas.whiteboard.session.AppSessionService;
 import dev.oscarrojas.whiteboard.ws.WebSocketMessageHandler;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import org.junit.jupiter.api.Test;

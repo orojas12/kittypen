@@ -1,4 +1,4 @@
-package dev.oscarrojas.whiteboard;
+package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.exception.NotFoundException;
 import org.springframework.stereotype.Repository;

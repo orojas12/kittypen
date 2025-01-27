@@ -1,9 +1,9 @@
 package dev.oscarrojas.whiteboard.canvas;
 
-import dev.oscarrojas.whiteboard.AppSession;
-import dev.oscarrojas.whiteboard.AppSessionService;
-import dev.oscarrojas.whiteboard.InMemoryAppSessionDao;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
+import dev.oscarrojas.whiteboard.session.AppSession;
+import dev.oscarrojas.whiteboard.session.AppSessionService;
+import dev.oscarrojas.whiteboard.session.InMemoryAppSessionDao;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import dev.oscarrojas.whiteboard.ws.protocol.BinaryDecodingException;
 import org.junit.jupiter.api.AfterEach;
@@ -70,7 +70,9 @@ class CanvasMessageConsumerIT {
         WebSocketSession ws1 = mock(StandardWebSocketSession.class);
         WebSocketSession ws2 = mock(StandardWebSocketSession.class);
         when(ws1.getId()).thenReturn("ws1");
+        when(ws1.isOpen()).thenReturn(true);
         when(ws2.getId()).thenReturn("ws2");
+        when(ws2.isOpen()).thenReturn(true);
         AppSession session = new AppSession(
             "session1",
             new Canvas(1, 1),

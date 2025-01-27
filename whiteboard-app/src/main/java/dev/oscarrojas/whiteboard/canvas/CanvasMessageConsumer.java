@@ -1,12 +1,12 @@
 package dev.oscarrojas.whiteboard.canvas;
 
-import dev.oscarrojas.whiteboard.AppSession;
-import dev.oscarrojas.whiteboard.AppSessionService;
 import dev.oscarrojas.whiteboard.exception.InvalidInputException;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
 import dev.oscarrojas.whiteboard.messaging.annotation.Action;
 import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
+import dev.oscarrojas.whiteboard.session.AppSession;
+import dev.oscarrojas.whiteboard.session.AppSessionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 

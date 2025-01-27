@@ -1,4 +1,4 @@
-package dev.oscarrojas.whiteboard;
+package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
