@@ -4,6 +4,7 @@ import dev.oscarrojas.whiteboard.canvas.Canvas;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
 import org.springframework.web.socket.BinaryMessage;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class AppSession {
         broadcastMessage(message, List.of());
     }
 
-    public void broadcastMessage(AppMessage message, List<String> exclude) throws IOException {
+    public void broadcastMessage(AppMessage message, List<String> exclude) {
         BinaryMessage binaryMessage = new BinaryMessage(encoder.encode(message));
 
         for (WebSocketSession connection : connections.values()) {
@@ -86,11 +87,11 @@ public class AppSession {
                 continue;
             }
 
-            connection.sendMessage(binaryMessage);
+            trySendMessage(connection, binaryMessage);
         }
     }
 
-    public void sendMessage(String connectionId, AppMessage message) throws IOException {
+    public void sendMessage(String connectionId, AppMessage message) {
         WebSocketSession connection = connections.get(connectionId);
 
         if (connection == null) {
@@ -98,6 +99,27 @@ public class AppSession {
         }
 
         BinaryMessage binaryMessage = new BinaryMessage(encoder.encode(message));
-        connection.sendMessage(binaryMessage);
+
+        trySendMessage(connection, binaryMessage);
+    }
+
+    public WebSocketSession removeConnection(WebSocketSession ws) {
+        return connections.remove(ws.getId());
+    }
+
+    private void trySendMessage(WebSocketSession ws, BinaryMessage message) {
+        try {
+            ws.sendMessage(message);
+        } catch (IOException e) {
+            WebSocketSession removed = connections.remove(ws.getId());
+            if (removed.isOpen()) {
+                try {
+                    removed.close(CloseStatus.SERVER_ERROR);
+                } catch (Throwable t) {
+                    // ignore
+                }
+            }
+        }
+
     }
 }

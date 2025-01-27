@@ -10,7 +10,6 @@ import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.io.IOException;
 import java.util.Collections;
 
 @Component
@@ -45,11 +44,6 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
         canvas.setLastUpdated(message.getTimestamp());
         sessionService.saveSession(session);
         AppMessage appMessage = new AppMessage("canvas", "update", canvas.getData());
-
-        try {
-            session.broadcastMessage(appMessage, Collections.singletonList(ws.getId()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        session.broadcastMessage(appMessage, Collections.singletonList(ws.getId()));
     }
 }
