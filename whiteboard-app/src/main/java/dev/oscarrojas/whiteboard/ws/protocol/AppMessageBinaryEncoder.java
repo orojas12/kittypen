@@ -14,6 +14,13 @@ public class AppMessageBinaryEncoder {
     private static final int CHANNEL_HEADER_BYTES = 1;
     private static final int ACTION_HEADER_BYTES = 1;
     private static final int PAYLOAD_HEADER_BYTES = 4;
+    public static final int BASE_FRAME_SIZE =
+        EPOCH_MILLISECOND_BYTES
+            + CHANNEL_HEADER_BYTES
+            + (2 ^ (CHANNEL_HEADER_BYTES * 8))
+            + ACTION_HEADER_BYTES
+            + (2 ^ (ACTION_HEADER_BYTES * 8))
+            + PAYLOAD_HEADER_BYTES;
 
     public byte[] encode(AppMessage message) {
         String channel = message.getChannel();

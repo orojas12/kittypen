@@ -70,7 +70,7 @@ public class AppSessionService {
         if (optimalSession == null) {
             optimalSession = new AppSession(
                 UUID.randomUUID().toString(),
-                new Canvas(10, 10),
+                new Canvas(1000, 1000),
                 encoder
             );
         }
