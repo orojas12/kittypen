@@ -21,6 +21,11 @@ body {
 }
 
 .container {
+  display: flex;
+  gap: 16px;
+}
+
+.canvas-wrapper {
   background-color: #eee;
   border-radius: 16px;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px;
@@ -46,7 +51,7 @@ body {
   background-color: rgb(40, 78, 194);
 }
 
-#canvas {
+.canvas {
   aspect-ratio: 1;
   width: 720px;
   image-rendering: pixelated;
