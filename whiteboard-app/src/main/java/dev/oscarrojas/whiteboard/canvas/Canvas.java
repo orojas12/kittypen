@@ -49,6 +49,26 @@ public class Canvas {
         data = array;
     }
 
+    void putData(CanvasFrame frame) {
+        byte[] src = frame.getData();
+        int startX = frame.getStartX();
+        int startY = frame.getStartY();
+        int width = frame.getEndX() - startX;
+        int height = frame.getEndY() - startY;
+
+        for (int i = 0; i < height; i++) {
+            int rowIndex = (startY + i) * (this.width * 4) + (startX * 4);
+            for (int j = 0; j < width; j++) {
+                int destIndex = rowIndex + j * 4;
+                int srcIndex = (i * width + j) * 4;
+                data[destIndex] = src[srcIndex];
+                data[destIndex + 1] = src[srcIndex + 1];
+                data[destIndex + 2] = src[srcIndex + 2];
+                data[destIndex + 3] = src[srcIndex + 3];
+            }
+        }
+    }
+
     void reset() {
         Arrays.fill(data, (byte) 0);
     }

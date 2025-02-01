@@ -2,9 +2,9 @@ package dev.oscarrojas.whiteboard.canvas;
 
 import java.nio.ByteBuffer;
 
-public class CanvasFrameBinaryDecoder {
+public class CanvasFrameBinaryConverter {
 
-    CanvasFrame decode(byte[] payload) {
+    CanvasFrame fromBytes(byte[] payload) {
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         CanvasFrame frame = new CanvasFrame();
 

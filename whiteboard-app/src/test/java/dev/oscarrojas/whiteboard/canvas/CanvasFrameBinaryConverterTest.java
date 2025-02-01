@@ -6,10 +6,10 @@ import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CanvasFrameBinaryDecoderTest {
+class CanvasFrameBinaryConverterTest {
 
     @Test
-    void decode() {
+    void fromBytes() {
         // 4 32-bit integers (4 * 4 bytes) for frame bounds and 16 bytes of frame data
         ByteBuffer buffer = ByteBuffer.allocate(4 * 4 + 16);
         // startX
@@ -26,9 +26,9 @@ class CanvasFrameBinaryDecoderTest {
             buffer.put(b);
         }
 
-        CanvasFrameBinaryDecoder decoder = new CanvasFrameBinaryDecoder();
+        CanvasFrameBinaryConverter decoder = new CanvasFrameBinaryConverter();
 
-        CanvasFrame frame = decoder.decode(buffer.array());
+        CanvasFrame frame = decoder.fromBytes(buffer.array());
 
         assertEquals(1, frame.getStartX());
         assertEquals(2, frame.getStartY());

@@ -83,7 +83,7 @@ export default class AppMessageBinaryEncoder {
     // extract action header
     const actionByteLength = view.getUint8(bufPos++);
 
-    // extract channel
+    // extract action
     const actionBytes = new Uint8Array(actionByteLength);
     for (let i = 0; i < actionByteLength; i++) {
       actionBytes[i] = view.getUint8(bufPos++);
@@ -99,7 +99,7 @@ export default class AppMessageBinaryEncoder {
     for (let i = 0; i < payloadByteLength; i++) {
       payload[i] = view.getUint8(bufPos++);
     }
-    message.payload = payload;
+    message.payload = payload.buffer;
 
     return message;
   };

@@ -1,10 +1,12 @@
 import AppMessageBinaryEncoder from "../messaging/AppMessageBinaryEncoder";
 import { AppMessage } from "../messaging/types";
+import CanvasFrameBinaryConverter from "./CanvasFrameBinaryConverter";
 
 export type CanvasOptions = {
   width: number;
   height: number;
   lineWidth: number;
+  offline: boolean;
 };
 
 export type CanvasPointer = {
@@ -15,23 +17,31 @@ export type CanvasPointer = {
   isPressed: boolean;
 };
 
+type Coord = {
+  x: number;
+  y: number;
+};
+
 const DEFAULT_CANVAS_OPTIONS = {
   width: 100,
   height: 100,
   lineWidth: 4,
+  offline: false,
 };
 
 export class Canvas {
   private options: CanvasOptions;
   private ctx: CanvasRenderingContext2D;
   private ws: WebSocket;
-  private synced: boolean;
   private syncInterval: NodeJS.Timeout;
   private pointer: CanvasPointer;
-  private encoder: AppMessageBinaryEncoder;
+  private messageEncoder: AppMessageBinaryEncoder;
+  private canvasFrameConverter: CanvasFrameBinaryConverter;
+  private drawBuffer: Coord[];
 
   constructor(ctx: CanvasRenderingContext2D, options?: Partial<CanvasOptions>) {
-    this.encoder = new AppMessageBinaryEncoder();
+    this.messageEncoder = new AppMessageBinaryEncoder();
+    this.canvasFrameConverter = new CanvasFrameBinaryConverter();
     this.options = {
       ...DEFAULT_CANVAS_OPTIONS,
       ...options,
@@ -44,17 +54,17 @@ export class Canvas {
       isPressed: false,
     };
 
+    this.drawBuffer = [];
+
     this.ctx = this.setUpContext(ctx);
 
-    this.ws = this.establishServerConnection();
-
-    this.synced = true;
+    !this.options.offline ? (this.ws = this.establishServerConnection()) : null;
 
     this.setUpEventListeners();
 
     requestAnimationFrame(this.updateFrame);
 
-    this.syncInterval = setInterval(this.syncWithServer, 100);
+    this.syncInterval = setInterval(this.pushToServer, 100);
   }
 
   setUpContext = (ctx: CanvasRenderingContext2D): CanvasRenderingContext2D => {
@@ -76,17 +86,20 @@ export class Canvas {
     });
 
     ws.addEventListener("message", (event) => {
-      const message = this.encoder.decode(event.data) as AppMessage;
+      const message = this.messageEncoder.decode(event.data) as AppMessage;
       console.log(
         `received message: {\ntimestamp: ${message.timestamp} \nchannel: ${message.channel}, \naction: ${message.action}, \npayload: ${message.payload}`,
       );
 
+      const canvasFrame = this.canvasFrameConverter.fromBytes(message.payload);
+
       const imgData = new ImageData(
-        new Uint8ClampedArray(message.payload),
-        this.options.width,
+        new Uint8ClampedArray(canvasFrame.data),
+        canvasFrame.endX - canvasFrame.startX || 1,
+        canvasFrame.endY - canvasFrame.startY || 1,
       );
 
-      this.ctx.putImageData(imgData, 0, 0);
+      this.ctx.putImageData(imgData, canvasFrame.startX, canvasFrame.startY);
     });
 
     return ws;
@@ -120,6 +133,10 @@ export class Canvas {
     }
   };
 
+  putImageData = (data: ImageData): void => {
+    this.ctx.putImageData(data, 0, 0);
+  };
+
   draw = (): void => {
     this.ctx.beginPath();
     this.ctx.moveTo(this.pointer.prevX, this.pointer.prevY);
@@ -128,34 +145,99 @@ export class Canvas {
   };
 
   updateFrame = (): void => {
-    if (this.pointer.isPressed) {
+    if (this.pointer.isPressed && this.withinBounds(this.pointer)) {
       this.draw();
-      this.synced = false;
+      this.drawBuffer.push({
+        x: Math.trunc(this.pointer.prevX),
+        y: Math.trunc(this.pointer.prevY),
+      });
+      this.drawBuffer.push({
+        x: Math.trunc(this.pointer.x),
+        y: Math.trunc(this.pointer.y),
+      });
     }
     requestAnimationFrame(this.updateFrame);
   };
 
-  syncWithServer = (): void => {
-    if (this.synced) return;
+  withinBounds = (pointer: CanvasPointer): boolean => {
+    return (
+      pointer.x >= 0 &&
+      pointer.x <= this.options.width &&
+      pointer.y >= 0 &&
+      pointer.y <= this.options.height
+    );
+  };
 
-    console.log("Syncing data...");
+  pushToServer = (): void => {
+    if (!this.drawBuffer.length) return;
+
+    const bounds = this.getBoundingBox();
+
+    console.log(bounds);
 
     const array = this.ctx.getImageData(
-      0,
-      0,
-      this.options.width,
-      this.options.height,
+      bounds.minX,
+      bounds.minY,
+      bounds.maxX - bounds.minX || 1,
+      bounds.maxY - bounds.minY || 1,
     ).data;
 
+    console.log("data:", array);
+
+    const frame = this.canvasFrameConverter.toBytes({
+      startX: bounds.minX,
+      startY: bounds.minY,
+      endX: bounds.maxX,
+      endY: bounds.maxY,
+      data: array,
+    });
+
     this.ws.send(
-      this.encoder.encode({
+      this.messageEncoder.encode({
         timestamp: Date.now(),
         channel: "canvas",
         action: "update",
-        payload: array,
+        payload: frame,
       }),
     );
+  };
 
-    this.synced = true;
+  getBoundingBox = () => {
+    const buffer = this.drawBuffer;
+    let minX = buffer[0].x;
+    let minY = buffer[0].y;
+    let maxX = buffer[0].x;
+    let maxY = buffer[0].y;
+
+    while (buffer.length) {
+      const coord = buffer.pop()!;
+      if (coord.x < minX) {
+        minX = coord.x;
+      }
+
+      if (coord.y < minY) {
+        minY = coord.y;
+      }
+
+      if (coord.x > maxX) {
+        maxX = coord.x;
+      }
+
+      if (coord.y > maxY) {
+        maxY = coord.y;
+      }
+    }
+
+    minX -= Math.trunc(this.options.lineWidth / 2);
+    minY -= Math.trunc(this.options.lineWidth / 2);
+    maxX += Math.trunc(this.options.lineWidth / 2);
+    maxY += Math.trunc(this.options.lineWidth / 2);
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    };
   };
 }

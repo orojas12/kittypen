@@ -1,6 +1,5 @@
 package dev.oscarrojas.whiteboard.canvas;
 
-import dev.oscarrojas.whiteboard.exception.InvalidInputException;
 import dev.oscarrojas.whiteboard.messaging.AppMessage;
 import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
 import dev.oscarrojas.whiteboard.messaging.annotation.Action;
@@ -16,6 +15,7 @@ import java.util.Collections;
 @Channel("canvas")
 public class CanvasMessageConsumer extends AppMessageConsumer {
 
+    private final CanvasFrameBinaryConverter converter = new CanvasFrameBinaryConverter();
     private final AppSessionService sessionService;
 
     public CanvasMessageConsumer(AppSessionService sessionService) {
@@ -25,15 +25,12 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
     @Action("update")
     public void update(AppMessage message, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
+        session.broadcastMessage(message, Collections.singletonList(ws.getId()));
+        // TODO: save partial canvas frame to session
         Canvas canvas = session.getCanvas();
-
-        // update message's timestamp is older than canvas' most recent update
-        if (message.getTimestamp().compareTo(canvas.getLastUpdated()) < 0) {
-            // abort update as this message is outdated and canvas currently
-            // reflects the state from a more recent update message
-            return;
-        }
-
+        CanvasFrame frame = converter.fromBytes(message.getPayload());
+        canvas.putData(frame);
+        /*
         try {
             canvas.putData(message.getPayload());
         } catch (InvalidInputException e) {
@@ -45,5 +42,6 @@ public class CanvasMessageConsumer extends AppMessageConsumer {
         sessionService.saveSession(session);
         AppMessage appMessage = new AppMessage("canvas", "update", canvas.getData());
         session.broadcastMessage(appMessage, Collections.singletonList(ws.getId()));
+         */
     }
 }

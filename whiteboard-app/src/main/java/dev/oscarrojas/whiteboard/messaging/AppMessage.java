@@ -51,4 +51,5 @@ public class AppMessage {
     public void setPayload(byte[] payload) {
         this.payload = payload;
     }
+
 }
