@@ -1,5 +1,5 @@
-import AppMessageBinaryEncoder from "../messaging/AppMessageBinaryEncoder";
-import { AppMessage } from "../messaging/types";
+import AppEventBinaryConverter from "../messaging/AppEventBinaryConverter";
+import { AppEvent } from "../messaging/types";
 import CanvasFrameBinaryConverter from "./CanvasFrameBinaryConverter";
 
 export type CanvasOptions = {
@@ -35,12 +35,12 @@ export class Canvas {
   private ws: WebSocket;
   private syncInterval: NodeJS.Timeout;
   private pointer: CanvasPointer;
-  private messageEncoder: AppMessageBinaryEncoder;
+  private messageEncoder: AppEventBinaryConverter;
   private canvasFrameConverter: CanvasFrameBinaryConverter;
   private drawBuffer: Coord[];
 
   constructor(ctx: CanvasRenderingContext2D, options?: Partial<CanvasOptions>) {
-    this.messageEncoder = new AppMessageBinaryEncoder();
+    this.messageEncoder = new AppEventBinaryConverter();
     this.canvasFrameConverter = new CanvasFrameBinaryConverter();
     this.options = {
       ...DEFAULT_CANVAS_OPTIONS,
@@ -86,7 +86,7 @@ export class Canvas {
     });
 
     ws.addEventListener("message", (event) => {
-      const message = this.messageEncoder.decode(event.data) as AppMessage;
+      const message = this.messageEncoder.decode(event.data) as AppEvent;
       console.log(
         `received message: {\ntimestamp: ${message.timestamp} \nchannel: ${message.channel}, \naction: ${message.action}, \npayload: ${message.payload}`,
       );

@@ -1,8 +1,8 @@
 package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.messaging.AppMessage;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
@@ -16,23 +16,23 @@ public class AppSession {
 
     private String id;
     private Canvas canvas;
-    private AppMessageBinaryEncoder encoder;
+    private AppEventBinaryConverter converter;
     private Map<String, WebSocketSession> connections = new HashMap<>();
 
-    public AppSession(String id, Canvas canvas, AppMessageBinaryEncoder encoder) {
+    public AppSession(String id, Canvas canvas, AppEventBinaryConverter converter) {
         this.id = id;
         this.canvas = canvas;
-        this.encoder = encoder;
+        this.converter = converter;
     }
 
     public AppSession(
         String id, Canvas canvas,
-        Map<String, WebSocketSession> connections, AppMessageBinaryEncoder encoder
+        Map<String, WebSocketSession> connections, AppEventBinaryConverter converter
     ) {
         this.id = id;
         this.canvas = canvas;
         this.connections = new HashMap<>(connections);
-        this.encoder = encoder;
+        this.converter = converter;
 
     }
 
@@ -40,7 +40,7 @@ public class AppSession {
         this.id = session.getId();
         this.canvas = new Canvas(session.getCanvas());
         this.connections = new HashMap<>(session.getConnections());
-        this.encoder = session.getEncoder();
+        this.converter = session.getConverter();
     }
 
     public String getId() {
@@ -55,8 +55,8 @@ public class AppSession {
         return canvas;
     }
 
-    public AppMessageBinaryEncoder getEncoder() {
-        return encoder;
+    public AppEventBinaryConverter getConverter() {
+        return converter;
     }
 
     public Map<String, WebSocketSession> getConnections() {
@@ -75,12 +75,12 @@ public class AppSession {
         return connections.size();
     }
 
-    public void broadcastMessage(AppMessage message) throws IOException {
-        broadcastMessage(message, List.of());
+    public void broadcastEvent(AppEvent event) throws IOException {
+        broadcastEvent(event, List.of());
     }
 
-    public void broadcastMessage(AppMessage message, List<String> exclude) {
-        BinaryMessage binaryMessage = new BinaryMessage(encoder.encode(message));
+    public void broadcastEvent(AppEvent event, List<String> exclude) {
+        BinaryMessage binaryMessage = new BinaryMessage(converter.toBytes(event));
 
         for (WebSocketSession connection : connections.values()) {
             if (exclude.contains(connection.getId())) {
@@ -88,22 +88,22 @@ public class AppSession {
             }
 
             if (connection.isOpen()) {
-                trySendMessage(connection, binaryMessage);
+                trySendEvent(connection, binaryMessage);
             }
         }
     }
 
-    public void sendMessage(String connectionId, AppMessage message) {
+    public void sendEvent(String connectionId, AppEvent event) {
         WebSocketSession connection = connections.get(connectionId);
 
         if (connection == null) {
             return;
         }
 
-        BinaryMessage binaryMessage = new BinaryMessage(encoder.encode(message));
+        BinaryMessage binaryMessage = new BinaryMessage(converter.toBytes(event));
 
         if (connection.isOpen()) {
-            trySendMessage(connection, binaryMessage);
+            trySendEvent(connection, binaryMessage);
         } else {
             WebSocketSession ws = removeConnection(connection);
         }
@@ -113,7 +113,7 @@ public class AppSession {
         return connections.remove(ws.getId());
     }
 
-    private void trySendMessage(WebSocketSession ws, BinaryMessage message) {
+    private void trySendEvent(WebSocketSession ws, BinaryMessage message) {
         try {
             ws.sendMessage(message);
         } catch (IOException e) {

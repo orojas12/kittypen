@@ -1,8 +1,8 @@
 package dev.oscarrojas.whiteboard.config;
 
-import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
-import dev.oscarrojas.whiteboard.messaging.AppMessageConsumer;
-import dev.oscarrojas.whiteboard.messaging.annotation.Channel;
+import dev.oscarrojas.whiteboard.messaging.AppEventEmitter;
+import dev.oscarrojas.whiteboard.messaging.AppEventListener;
+import dev.oscarrojas.whiteboard.messaging.annotation.Event;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -19,22 +19,40 @@ public class AppConfig {
         return new SimpleAsyncTaskExecutor();
     }
 
+//    @Bean
+//    public AppMessageBroker messageBroker(List<AppMessageConsumer> consumers) {
+//        AppMessageBroker broker = new AppMessageBroker();
+//
+//        for (AppMessageConsumer consumer : consumers) {
+//            Channel channel = consumer.getClass()
+//                .getDeclaredAnnotation(Channel.class);
+//
+//            if (channel == null) {
+//                // TODO: log non-annotated consumer
+//                continue;
+//            }
+//
+//            broker.subscribe(channel.value(), consumer);
+//        }
+//
+//        return broker;
+//    }
+
     @Bean
-    public AppMessageBroker messageBroker(List<AppMessageConsumer> consumers) {
-        AppMessageBroker broker = new AppMessageBroker();
+    public AppEventEmitter eventEmitter(List<AppEventListener> listeners) {
+        AppEventEmitter emitter = new AppEventEmitter();
 
-        for (AppMessageConsumer consumer : consumers) {
-            Channel channel = consumer.getClass()
-                .getDeclaredAnnotation(Channel.class);
+        for (AppEventListener listener : listeners) {
+            Event event = listeners.getClass().getDeclaredAnnotation(Event.class);
 
-            if (channel == null) {
-                // TODO: log non-annotated consumer
+            if (event == null) {
+                // TODO: log non-annotated listener
                 continue;
             }
 
-            broker.subscribe(channel.value(), consumer);
+            emitter.addEventListener(event.value(), listener);
         }
 
-        return broker;
+        return emitter;
     }
 }

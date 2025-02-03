@@ -1,6 +1,5 @@
-export type AppMessage = {
+export type AppEvent = {
   timestamp: number;
-  channel: string;
-  action: string;
+  name: string;
   payload: ArrayBuffer;
 };

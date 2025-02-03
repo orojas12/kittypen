@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class CanvasFrameBinaryConverter {
 
-    CanvasFrame fromBytes(byte[] payload) {
+    public CanvasFrame fromBytes(byte[] payload) {
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         CanvasFrame frame = new CanvasFrame();
 
@@ -20,6 +20,22 @@ public class CanvasFrameBinaryConverter {
         buffer.get(buffer.position(), frame.getData());
 
         return frame;
+    }
+
+    public byte[] toBytes(CanvasFrame frame) {
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[4 * 4 + frame.getData().length]);
+
+        buffer.putInt(frame.getStartX());
+        buffer.putInt(frame.getStartY());
+        buffer.putInt(frame.getEndX());
+        buffer.putInt(frame.getEndY());
+
+        byte[] data = frame.getData();
+        for (int i = 0; i < data.length; i++) {
+            buffer.put(data[i]);
+        }
+
+        return buffer.array();
     }
 
 }

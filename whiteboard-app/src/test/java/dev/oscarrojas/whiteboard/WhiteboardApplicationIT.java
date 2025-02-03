@@ -1,10 +1,10 @@
 package dev.oscarrojas.whiteboard;
 
-import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
+import dev.oscarrojas.whiteboard.messaging.AppEventEmitter;
 import dev.oscarrojas.whiteboard.session.AppSession;
 import dev.oscarrojas.whiteboard.session.AppSessionService;
 import dev.oscarrojas.whiteboard.ws.WebSocketMessageHandler;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,10 +28,10 @@ class WhiteboardApplicationIT {
     AppSessionService sessionService;
 
     @Autowired
-    AppMessageBroker messageBroker;
+    AppEventEmitter eventEmitter;
 
     @Autowired
-    AppMessageBinaryEncoder encoder;
+    AppEventBinaryConverter converter;
 
     @Test
     void registersNewConnection() {

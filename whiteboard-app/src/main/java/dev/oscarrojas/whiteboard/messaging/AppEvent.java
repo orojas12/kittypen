@@ -2,21 +2,19 @@ package dev.oscarrojas.whiteboard.messaging;
 
 import java.time.Instant;
 
-public class AppMessage {
+public class AppEvent {
 
     private Instant timestamp;
-    private String channel;
-    private String action;
+    private String name;
     private byte[] payload;
 
-    public AppMessage() {
+    public AppEvent() {
         this.timestamp = Instant.ofEpochMilli(Instant.now().toEpochMilli());
     }
 
-    public AppMessage(String channel, String action, byte[] payload) {
+    public AppEvent(String name, byte[] payload) {
         this.timestamp = Instant.ofEpochMilli(Instant.now().toEpochMilli());
-        this.channel = channel;
-        this.action = action;
+        this.name = name;
         this.payload = payload;
     }
 
@@ -28,21 +26,15 @@ public class AppMessage {
         this.timestamp = timestamp;
     }
 
-    public String getChannel() {
-        return channel;
+
+    public String getName() {
+        return name;
     }
 
-    public void setChannel(String channel) {
-        this.channel = channel;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String event) {
-        this.action = event;
-    }
 
     public byte[] getPayload() {
         return payload;

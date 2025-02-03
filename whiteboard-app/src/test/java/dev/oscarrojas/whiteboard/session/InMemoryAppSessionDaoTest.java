@@ -2,7 +2,7 @@ package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
 import dev.oscarrojas.whiteboard.exception.NotFoundException;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
@@ -17,14 +17,14 @@ import static org.mockito.Mockito.when;
 
 class InMemoryAppSessionDaoTest {
 
-    AppMessageBinaryEncoder encoder = new AppMessageBinaryEncoder();
+    AppEventBinaryConverter converter = new AppEventBinaryConverter();
 
     @Test
     void getAllByConnectionCountRange_returnsSessionsWithinRange() {
         AppSessionDao dao = new InMemoryAppSessionDao();
         AppSession session1 = new AppSession(
             UUID.randomUUID().toString(), new Canvas(1, 1),
-            encoder
+            converter
         );
         WebSocketSession ws1 = mock(StandardWebSocketSession.class);
         when(ws1.getId()).thenReturn("ws1");
@@ -56,7 +56,7 @@ class InMemoryAppSessionDaoTest {
         AppSessionDao dao = new InMemoryAppSessionDao();
         AppSession session1 = new AppSession(
             UUID.randomUUID().toString(), new Canvas(1, 1),
-            encoder
+            converter
         );
         dao.save(session1);
 
@@ -80,7 +80,7 @@ class InMemoryAppSessionDaoTest {
         AppSessionDao dao = new InMemoryAppSessionDao();
         AppSession session1 = new AppSession(
             UUID.randomUUID().toString(), new Canvas(1, 1),
-            encoder
+            converter
         );
         dao.save(session1);
         session1 = dao.get(session1.getId()).get();

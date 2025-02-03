@@ -1,10 +1,10 @@
 package dev.oscarrojas.whiteboard.ws;
 
-import dev.oscarrojas.whiteboard.messaging.AppMessage;
-import dev.oscarrojas.whiteboard.messaging.AppMessageBroker;
+import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.messaging.AppEventEmitter;
 import dev.oscarrojas.whiteboard.session.AppSession;
 import dev.oscarrojas.whiteboard.session.AppSessionService;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import dev.oscarrojas.whiteboard.ws.protocol.BinaryDecodingException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
@@ -18,33 +18,33 @@ import java.util.Optional;
 @Component
 public class WebSocketMessageHandler extends BinaryWebSocketHandler {
 
-    private AppMessageBroker messageBroker;
+    private AppEventEmitter eventEmitter;
     private AppSessionService sessionService;
-    private AppMessageBinaryEncoder encoder;
+    private AppEventBinaryConverter converter;
 
     public WebSocketMessageHandler(
-        AppMessageBroker messageBroker,
+        AppEventEmitter eventEmitter,
         AppSessionService sessionService,
-        AppMessageBinaryEncoder encoder
+        AppEventBinaryConverter converter
     ) {
-        this.messageBroker = messageBroker;
+        this.eventEmitter = eventEmitter;
         this.sessionService = sessionService;
-        this.encoder = encoder;
+        this.converter = converter;
     }
 
     @Override
     protected void handleBinaryMessage(
         WebSocketSession ws, BinaryMessage message) {
 
-        AppMessage appMessage;
+        AppEvent event;
         try {
-            appMessage = encoder.decode(message.getPayload());
+            event = converter.fromBytes(message.getPayload());
         } catch (BinaryDecodingException e) {
             tryCloseWithStatus(ws, CloseStatus.PROTOCOL_ERROR);
             return;
         }
 
-        messageBroker.publish(appMessage.getChannel(), appMessage, ws);
+        eventEmitter.emit(event.getName(), event, ws);
     }
 
     @Override

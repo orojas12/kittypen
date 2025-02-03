@@ -1,7 +1,7 @@
 package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,13 +27,13 @@ class AppSessionServiceIT {
     AppSessionDao sessionDao;
 
     @Autowired
-    AppMessageBinaryEncoder encoder;
+    AppEventBinaryConverter converter;
 
     @Test
     void getSession_addsNewConnectionToExistingSessionIfNotFull() {
         AppSession session1 = new AppSession(
             UUID.randomUUID().toString(), new Canvas(1, 1),
-            encoder
+            converter
         );
         sessionDao.save(session1);
 

@@ -1,7 +1,7 @@
 package dev.oscarrojas.whiteboard.session;
 
 import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.ws.protocol.AppMessageBinaryEncoder;
+import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -13,11 +13,11 @@ import java.util.UUID;
 public class AppSessionService {
 
     private AppSessionDao sessionDao;
-    private AppMessageBinaryEncoder encoder;
+    private AppEventBinaryConverter converter;
 
-    AppSessionService(AppSessionDao sessionDao, AppMessageBinaryEncoder encoder) {
+    AppSessionService(AppSessionDao sessionDao, AppEventBinaryConverter converter) {
         this.sessionDao = sessionDao;
-        this.encoder = encoder;
+        this.converter = converter;
     }
 
     public Optional<AppSession> getSession(String sessionId) {
@@ -71,7 +71,7 @@ public class AppSessionService {
             optimalSession = new AppSession(
                 UUID.randomUUID().toString(),
                 new Canvas(1000, 1000),
-                encoder
+                converter
             );
         }
 
