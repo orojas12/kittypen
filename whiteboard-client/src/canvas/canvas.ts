@@ -1,12 +1,9 @@
-import AppEventBinaryConverter from "../messaging/AppEventBinaryConverter";
-import { AppEvent } from "../messaging/types";
-import CanvasFrameBinaryConverter from "./CanvasFrameBinaryConverter";
+import type { CanvasFrame } from "./types";
 
-export type CanvasOptions = {
+export type CanvasConfig = {
   width: number;
   height: number;
   lineWidth: number;
-  offline: boolean;
 };
 
 export type CanvasPointer = {
@@ -22,30 +19,24 @@ type Coord = {
   y: number;
 };
 
-const DEFAULT_CANVAS_OPTIONS = {
+const DEFAULT_CANVAS_CONFIG = {
   width: 100,
   height: 100,
   lineWidth: 4,
-  offline: false,
 };
 
 export class Canvas {
-  private options: CanvasOptions;
+  private config: CanvasConfig;
   private ctx: CanvasRenderingContext2D;
-  private ws: WebSocket;
-  private syncInterval: NodeJS.Timeout;
   private pointer: CanvasPointer;
-  private messageEncoder: AppEventBinaryConverter;
-  private canvasFrameConverter: CanvasFrameBinaryConverter;
   private drawBuffer: Coord[];
 
-  constructor(ctx: CanvasRenderingContext2D, options?: Partial<CanvasOptions>) {
-    this.messageEncoder = new AppEventBinaryConverter();
-    this.canvasFrameConverter = new CanvasFrameBinaryConverter();
-    this.options = {
-      ...DEFAULT_CANVAS_OPTIONS,
-      ...options,
+  constructor(ctx: CanvasRenderingContext2D, config?: Partial<CanvasConfig>) {
+    this.config = {
+      ...DEFAULT_CANVAS_CONFIG,
+      ...config,
     };
+
     this.pointer = {
       x: 0,
       y: 0,
@@ -58,60 +49,54 @@ export class Canvas {
 
     this.ctx = this.setUpContext(ctx);
 
-    !this.options.offline ? (this.ws = this.establishServerConnection()) : null;
-
     this.setUpEventListeners();
 
-    requestAnimationFrame(this.updateFrame);
+    requestAnimationFrame(this.tick);
 
-    this.syncInterval = setInterval(this.pushToServer, 100);
+    setInterval(this.flushAndUpdate, 100);
   }
 
-  setUpContext = (ctx: CanvasRenderingContext2D): CanvasRenderingContext2D => {
+  clear = (): void => {
+    this.ctx.clearRect(0, 0, this.config.width, this.config.height);
+  };
+
+  putFrame = (frame: CanvasFrame): void => {
+    this.ctx.putImageData(
+      new ImageData(
+        frame.data,
+        frame.endX - frame.startX,
+        frame.endY - frame.startY,
+      ),
+      frame.startX,
+      frame.startY,
+    );
+  };
+
+  onFrameUpdate = (handler: (frame: CanvasFrame) => void): void => {
+    this.handleFrameUpdate = handler;
+  };
+
+  private handleFrameUpdate = (frame: CanvasFrame) => {};
+
+  private setUpContext = (
+    ctx: CanvasRenderingContext2D,
+  ): CanvasRenderingContext2D => {
     ctx.imageSmoothingEnabled = false;
-    ctx.canvas.width = this.options.width;
-    ctx.canvas.height = this.options.height;
-    ctx.lineWidth = this.options.lineWidth;
+    ctx.canvas.width = this.config.width;
+    ctx.canvas.height = this.config.height;
+    ctx.lineWidth = this.config.lineWidth;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     return ctx;
   };
 
-  establishServerConnection = (): WebSocket => {
-    const ws = new WebSocket("ws://localhost:8080");
-    ws.binaryType = "arraybuffer";
-
-    ws.addEventListener("open", (event) => {
-      console.log("Connection established with ws://localhost:8080");
-    });
-
-    ws.addEventListener("message", (event) => {
-      const message = this.messageEncoder.decode(event.data) as AppEvent;
-      console.log(
-        `received message: {\ntimestamp: ${message.timestamp} \nchannel: ${message.channel}, \naction: ${message.action}, \npayload: ${message.payload}`,
-      );
-
-      const canvasFrame = this.canvasFrameConverter.fromBytes(message.payload);
-
-      const imgData = new ImageData(
-        new Uint8ClampedArray(canvasFrame.data),
-        canvasFrame.endX - canvasFrame.startX || 1,
-        canvasFrame.endY - canvasFrame.startY || 1,
-      );
-
-      this.ctx.putImageData(imgData, canvasFrame.startX, canvasFrame.startY);
-    });
-
-    return ws;
-  };
-
-  setUpEventListeners = (): void => {
+  private setUpEventListeners = (): void => {
     document.addEventListener("pointerdown", this.handlePointerEvent);
     document.addEventListener("pointerup", this.handlePointerEvent);
     document.addEventListener("pointermove", this.handlePointerEvent);
   };
 
-  handlePointerEvent = (event: PointerEvent): void => {
+  private handlePointerEvent = (event: PointerEvent): void => {
     const domRect = this.ctx.canvas.getBoundingClientRect();
 
     if (event.type === "pointerdown") {
@@ -128,24 +113,20 @@ export class Canvas {
       const scaleX = this.pointer.x / domRect.width;
       const scaleY = this.pointer.y / domRect.height;
 
-      this.pointer.x = Math.trunc(this.options.width * scaleX) + 0.5;
-      this.pointer.y = Math.trunc(this.options.height * scaleY) + 0.5;
+      this.pointer.x = Math.trunc(this.config.width * scaleX) + 0.5;
+      this.pointer.y = Math.trunc(this.config.height * scaleY) + 0.5;
     }
   };
 
-  putImageData = (data: ImageData): void => {
-    this.ctx.putImageData(data, 0, 0);
-  };
-
-  draw = (): void => {
+  private draw = (): void => {
     this.ctx.beginPath();
     this.ctx.moveTo(this.pointer.prevX, this.pointer.prevY);
     this.ctx.lineTo(this.pointer.x, this.pointer.y);
     this.ctx.stroke();
   };
 
-  updateFrame = (): void => {
-    if (this.pointer.isPressed && this.withinBounds(this.pointer)) {
+  private tick = (): void => {
+    if (this.pointer.isPressed && this.isInsideCanvas(this.pointer)) {
       this.draw();
       this.drawBuffer.push({
         x: Math.trunc(this.pointer.prevX),
@@ -156,53 +137,39 @@ export class Canvas {
         y: Math.trunc(this.pointer.y),
       });
     }
-    requestAnimationFrame(this.updateFrame);
+    requestAnimationFrame(this.tick);
   };
 
-  withinBounds = (pointer: CanvasPointer): boolean => {
+  private isInsideCanvas = (pointer: CanvasPointer): boolean => {
     return (
       pointer.x >= 0 &&
-      pointer.x <= this.options.width &&
+      pointer.x <= this.config.width &&
       pointer.y >= 0 &&
-      pointer.y <= this.options.height
+      pointer.y <= this.config.height
     );
   };
 
-  pushToServer = (): void => {
+  private flushAndUpdate = (): void => {
     if (!this.drawBuffer.length) return;
 
     const bounds = this.getBoundingBox();
-
-    console.log(bounds);
-
-    const array = this.ctx.getImageData(
+    const data = this.ctx.getImageData(
       bounds.minX,
       bounds.minY,
       bounds.maxX - bounds.minX || 1,
       bounds.maxY - bounds.minY || 1,
     ).data;
 
-    console.log("data:", array);
-
-    const frame = this.canvasFrameConverter.toBytes({
+    this.handleFrameUpdate({
       startX: bounds.minX,
       startY: bounds.minY,
       endX: bounds.maxX,
       endY: bounds.maxY,
-      data: array,
+      data,
     });
-
-    this.ws.send(
-      this.messageEncoder.encode({
-        timestamp: Date.now(),
-        channel: "canvas",
-        action: "update",
-        payload: frame,
-      }),
-    );
   };
 
-  getBoundingBox = () => {
+  private getBoundingBox = () => {
     const buffer = this.drawBuffer;
     let minX = buffer[0].x;
     let minY = buffer[0].y;
@@ -228,10 +195,10 @@ export class Canvas {
       }
     }
 
-    minX -= Math.trunc(this.options.lineWidth / 2);
-    minY -= Math.trunc(this.options.lineWidth / 2);
-    maxX += Math.trunc(this.options.lineWidth / 2);
-    maxY += Math.trunc(this.options.lineWidth / 2);
+    minX -= Math.trunc(this.config.lineWidth / 2);
+    minY -= Math.trunc(this.config.lineWidth / 2);
+    maxX += Math.trunc(this.config.lineWidth / 2);
+    maxY += Math.trunc(this.config.lineWidth / 2);
 
     return {
       minX,

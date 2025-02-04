@@ -1,5 +1,5 @@
-export type AppEvent = {
+export type AppEvent<T> = {
   timestamp: number;
   name: string;
-  payload: ArrayBuffer;
+  payload: T;
 };
