@@ -101,12 +101,11 @@ export class Canvas {
 
     if (event.type === "pointerdown") {
       this.pointer.isPressed = true;
+      this.pointer.prevX = this.pointer.x;
+      this.pointer.prevY = this.pointer.y;
     } else if (event.type === "pointerup") {
       this.pointer.isPressed = false;
     } else {
-      this.pointer.prevX = this.pointer.x;
-      this.pointer.prevY = this.pointer.y;
-
       this.pointer.x = event.pageX - domRect.left;
       this.pointer.y = event.pageY - domRect.top;
 
@@ -137,6 +136,8 @@ export class Canvas {
         y: Math.trunc(this.pointer.y),
       });
     }
+    this.pointer.prevX = this.pointer.x;
+    this.pointer.prevY = this.pointer.y;
     requestAnimationFrame(this.tick);
   };
 
