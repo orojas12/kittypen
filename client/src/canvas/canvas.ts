@@ -58,6 +58,19 @@ export class Canvas {
 
   clear = (): void => {
     this.ctx.clearRect(0, 0, this.config.width, this.config.height);
+    const data = this.ctx.getImageData(
+      0,
+      0,
+      this.config.width,
+      this.config.height,
+    ).data;
+    this.handleFrameUpdate({
+      startX: 0,
+      startY: 0,
+      endX: this.config.width,
+      endY: this.config.height,
+      data,
+    });
   };
 
   putFrame = (frame: CanvasFrame): void => {
