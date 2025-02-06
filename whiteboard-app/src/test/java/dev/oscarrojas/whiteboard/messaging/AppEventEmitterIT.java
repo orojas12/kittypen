@@ -11,8 +11,9 @@ import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 class AppEventEmitterIT {
 
     @Autowired

@@ -20,8 +20,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext
 class CanvasEventListenerIT {
 
@@ -105,6 +106,5 @@ class CanvasEventListenerIT {
             assertEquals(event.getPayload()[i], data[i]);
         }
     }
-
 
 }
