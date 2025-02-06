@@ -79,7 +79,19 @@ public class Canvas {
      * @param height rectangle height
      */
     byte[] getData(int x, int y, int width, int height) {
-       
+        byte[] data = new byte[width * height * 4];
+        for (int i = 0; i < height; i++) {
+            int start = (y + i) * (this.width * 4) + x * 4;
+            for (int j = 0; j < width * 4; j += 4) {
+                int srcIndex = start + j;
+                int dstIndex = i * width * 4 + j;
+                data[dstIndex] = this.data[srcIndex];
+                data[dstIndex + 1] = this.data[srcIndex + 1];
+                data[dstIndex + 2] = this.data[srcIndex + 2];
+                data[dstIndex + 3] = this.data[srcIndex + 3];
+            }
+        }
+        return data;
     }
 
     void reset() {
