@@ -21,25 +21,18 @@ public class CanvasEventListener extends AppEventListener {
     }
 
     @Event("canvas.putFrame")
-    public void update(AppEvent event, WebSocketSession ws) {
+    public void putFrame(AppEvent event, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
-        // TODO: save partial canvas frame to session
         Canvas canvas = session.getCanvas();
         CanvasFrame frame = converter.fromBytes(event.getPayload());
         canvas.putData(frame);
         session.broadcastEvent(event, Collections.singletonList(ws.getId()));
-        /*
-        try {
-            canvas.putData(event.getPayload());
-        } catch (InvalidInputException e) {
-            // TODO: figure out a good way to send error event
-            throw new RuntimeException(e);
-        }
-
-        canvas.setLastUpdated(event.getTimestamp());
         sessionService.saveSession(session);
-        AppMessage appMessage = new AppMessage("canvas", "update", canvas.getData());
-        session.broadcastMessage(appMessage, Collections.singletonList(ws.getId()));
-         */
+    }
+
+    @Event("canvas.getFrame")
+    public void getFrame(AppEvent event, WebSocketSession ws) {
+        AppSession session = sessionService.getSession(ws);
+
     }
 }

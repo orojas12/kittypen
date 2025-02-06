@@ -69,6 +69,19 @@ public class Canvas {
         }
     }
 
+    /**
+     * Returns a byte array representing the underlying image data for a specified
+     * portion of the canvas.
+     *
+     * @param x      starting x position
+     * @param y      starting y position
+     * @param width  rectangle width
+     * @param height rectangle height
+     */
+    byte[] getData(int x, int y, int width, int height) {
+       
+    }
+
     void reset() {
         Arrays.fill(data, (byte) 0);
     }
