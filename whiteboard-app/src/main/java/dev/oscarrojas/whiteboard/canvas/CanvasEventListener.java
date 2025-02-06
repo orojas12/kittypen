@@ -20,7 +20,7 @@ public class CanvasEventListener extends AppEventListener {
         this.sessionService = sessionService;
     }
 
-    @Event("canvas.update")
+    @Event("canvas.putFrame")
     public void update(AppEvent event, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
         // TODO: save partial canvas frame to session

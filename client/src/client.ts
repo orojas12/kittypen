@@ -14,6 +14,7 @@ export class WhiteboardClient {
 
   constructor(eventEmitter: EventEmitter, canvas: Canvas) {
     this.ws = new WebSocket("ws://localhost:8080");
+    this.ws.binaryType = "arraybuffer";
     this.eventEmitter = eventEmitter;
     this.canvas = canvas;
     this.messageConverter = new AppEventBinaryConverter();
@@ -23,6 +24,7 @@ export class WhiteboardClient {
   }
 
   private handleMessage = (message: MessageEvent): void => {
+    console.log(message);
     const event = this.messageConverter.fromBytes(message.data);
     this.eventEmitter.emit(event.name, event, this);
   };

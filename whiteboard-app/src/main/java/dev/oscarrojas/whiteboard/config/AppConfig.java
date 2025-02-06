@@ -2,7 +2,6 @@ package dev.oscarrojas.whiteboard.config;
 
 import dev.oscarrojas.whiteboard.messaging.AppEventEmitter;
 import dev.oscarrojas.whiteboard.messaging.AppEventListener;
-import dev.oscarrojas.whiteboard.messaging.annotation.Event;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -43,14 +42,10 @@ public class AppConfig {
         AppEventEmitter emitter = new AppEventEmitter();
 
         for (AppEventListener listener : listeners) {
-            Event event = listeners.getClass().getDeclaredAnnotation(Event.class);
-
-            if (event == null) {
-                // TODO: log non-annotated listener
-                continue;
+            Iterable<AppEventListener.ListenerMethod> methods = listener.getListenerMethods();
+            for (var method : methods) {
+                emitter.addEventListener(method.event, listener);
             }
-
-            emitter.addEventListener(event.value(), listener);
         }
 
         return emitter;
