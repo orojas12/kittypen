@@ -1,6 +1,6 @@
 package dev.oscarrojas.whiteboard.ws.protocol;
 
-import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.messaging.BinaryAppEvent;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AppEventBinaryConverterTest {
+public class BinaryAppEventBinaryConverterTest {
 
     @Test
     void toBytes() {
@@ -24,7 +24,7 @@ public class AppEventBinaryConverterTest {
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
         AppEventBinaryConverter converter = new AppEventBinaryConverter();
-        AppEvent event = new AppEvent(name, payload);
+        BinaryAppEvent event = new BinaryAppEvent(name, payload);
 
         byte[] result = converter.toBytes(event);
         ByteBuffer buffer = ByteBuffer.wrap(result);
@@ -75,10 +75,10 @@ public class AppEventBinaryConverterTest {
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
         AppEventBinaryConverter converter = new AppEventBinaryConverter();
-        AppEvent event = new AppEvent(name, payload);
+        BinaryAppEvent event = new BinaryAppEvent(name, payload);
         byte[] eventBytes = converter.toBytes(event);
 
-        AppEvent result = converter.fromBytes(eventBytes);
+        BinaryAppEvent result = converter.fromBytes(eventBytes);
 
         // decoded timestamp equals original timestamp
         assertEquals(event.getTimestamp(), result.getTimestamp());

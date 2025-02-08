@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class AppEventEmitterIT {
+class BinaryAppEventEmitterIT {
 
     @Autowired
     AppEventEmitter emitter;
@@ -43,7 +43,7 @@ class AppEventEmitterIT {
 
         Future<Void> future = emitter.emit(
             "mockEvent",
-            new AppEvent("mockEvent", new byte[0]),
+            new BinaryAppEvent("mockEvent", new byte[0]),
             new StandardWebSocketSession(null, null, null, null)
         );
 

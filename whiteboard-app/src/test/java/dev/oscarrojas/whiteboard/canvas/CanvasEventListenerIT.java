@@ -1,6 +1,6 @@
 package dev.oscarrojas.whiteboard.canvas;
 
-import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.messaging.BinaryAppEvent;
 import dev.oscarrojas.whiteboard.session.AppSession;
 import dev.oscarrojas.whiteboard.session.AppSessionService;
 import dev.oscarrojas.whiteboard.session.InMemoryAppSessionDao;
@@ -61,13 +61,14 @@ class CanvasEventListenerIT {
 
         CanvasFrameBinaryConverter frameConverter = new CanvasFrameBinaryConverter();
         CanvasFrame frame = new CanvasFrame(0, 0, 1, 1, new byte[]{1, 1, 1, 1});
-        AppEvent event = new AppEvent("canvas.putFrame", frameConverter.toBytes(frame));
+        BinaryAppEvent event = new BinaryAppEvent("canvas.putFrame", frameConverter.toBytes(frame));
         listener.putFrame(event, ws1);
 
         verify(ws1, times(0)).sendMessage(any());
         verify(ws2, times(1)).sendMessage(argThat((arg) -> {
             try {
-                AppEvent receivedEvent = eventConverter.fromBytes((ByteBuffer) arg.getPayload());
+                BinaryAppEvent receivedEvent = eventConverter.fromBytes(
+                    (ByteBuffer) arg.getPayload());
                 assertEquals(event.getName(), receivedEvent.getName());
                 byte[] frame1 = event.getPayload();
                 byte[] frame2 = receivedEvent.getPayload();
@@ -95,7 +96,7 @@ class CanvasEventListenerIT {
         sessionDao.save(session);
         CanvasFrameBinaryConverter frameConverter = new CanvasFrameBinaryConverter();
         CanvasFrame frame = new CanvasFrame(0, 0, 1, 1, new byte[]{1, 1, 1, 1});
-        AppEvent event = new AppEvent("canvas.putFrame", frameConverter.toBytes(frame));
+        BinaryAppEvent event = new BinaryAppEvent("canvas.putFrame", frameConverter.toBytes(frame));
 
         listener.putFrame(event, ws);
         session = service.getSession(session.getId()).get();

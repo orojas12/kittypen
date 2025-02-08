@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth/session")
-public class SessionController {
+public class UserSessionController {
 
     private final SecurityContextRepository securityContextRepository;
 
-    SessionController(
+    UserSessionController(
         SecurityContextRepository securityContextRepository
     ) {
         this.securityContextRepository = securityContextRepository;

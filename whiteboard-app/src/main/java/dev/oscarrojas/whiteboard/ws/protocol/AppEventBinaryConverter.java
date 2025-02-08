@@ -1,6 +1,6 @@
 package dev.oscarrojas.whiteboard.ws.protocol;
 
-import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.messaging.BinaryAppEvent;
 import org.springframework.stereotype.Component;
 
 import java.nio.ByteBuffer;
@@ -19,7 +19,7 @@ public class AppEventBinaryConverter {
             + (2 ^ (NAME_HEADER_BYTES * 8))
             + PAYLOAD_HEADER_BYTES;
 
-    public byte[] toBytes(AppEvent event) {
+    public byte[] toBytes(BinaryAppEvent event) {
         String name = event.getName();
         byte[] payload = event.getPayload();
 
@@ -51,12 +51,12 @@ public class AppEventBinaryConverter {
         return buffer.array();
     }
 
-    public AppEvent fromBytes(ByteBuffer buffer) throws BinaryDecodingException {
+    public BinaryAppEvent fromBytes(ByteBuffer buffer) throws BinaryDecodingException {
         if (buffer.position() != 0) {
             buffer.rewind();
         }
 
-        AppEvent event = new AppEvent();
+        BinaryAppEvent event = new BinaryAppEvent();
 
         try {
 
@@ -102,7 +102,7 @@ public class AppEventBinaryConverter {
         return event;
     }
 
-    public AppEvent fromBytes(byte[] bytes) throws BinaryDecodingException {
+    public BinaryAppEvent fromBytes(byte[] bytes) throws BinaryDecodingException {
         return fromBytes(ByteBuffer.wrap(bytes));
     }
 }

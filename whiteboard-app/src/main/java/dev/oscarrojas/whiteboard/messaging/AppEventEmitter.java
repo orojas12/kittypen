@@ -55,7 +55,7 @@ public class AppEventEmitter {
     @Async
     public Future<Void> emit(
         String eventName,
-        AppEvent event,
+        AppEvent<?> event,
         WebSocketSession ws
     ) {
         ArrayList<AppEventListener> listeners = eventListeners.get(eventName);
@@ -74,7 +74,8 @@ public class AppEventEmitter {
                         Object[] args = new Object[params.length];
 
                         for (int i = 0; i < params.length; i++) {
-                            if (params[i].getType() == AppEvent.class) {
+                            if (params[i].getType() == BinaryAppEvent.class ||
+                                params[i].getType() == JsonAppEvent.class) {
                                 args[i] = event;
                             } else if (params[i].getType() == WebSocketSession.class) {
                                 args[i] = ws;
@@ -104,7 +105,10 @@ public class AppEventEmitter {
             int wsParams = 0;
 
             for (Parameter param : params) {
-                if (param.getType() == AppEvent.class && eventParams == 0) {
+                if (param.getType() == BinaryAppEvent.class && eventParams == 0) {
+                    eventParams++;
+                    continue;
+                } else if (param.getType() == JsonAppEvent.class && eventParams == 0) {
                     eventParams++;
                     continue;
                 } else if (param.getType() == WebSocketSession.class && wsParams == 0) {

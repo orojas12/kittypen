@@ -8,6 +8,7 @@ import { AppEvent } from "./messaging/types";
 
 export type WhiteboardClientConfig = {
   username: string;
+  eventListeners: { name: string; callback: EventListener<any> }[];
 };
 
 export class WhiteboardClient {
@@ -23,23 +24,25 @@ export class WhiteboardClient {
     canvas: Canvas,
     config?: WhiteboardClientConfig,
   ) {
-    this.config = config || { username: "default" };
-
-    this.csrfToken = "";
-    const url = new URL("ws://localhost:8080/whiteboard");
-    url.searchParams.append("username", this.config.username);
-
-    this.initSession();
-
-    this.ws = new WebSocket(url);
-    this.ws.binaryType = "arraybuffer";
+    this.config = config || { username: "default", eventListeners: [] };
     this.eventEmitter = eventEmitter;
     this.canvas = canvas;
     this.messageConverter = new AppEventBinaryConverter();
 
-    this.ws.addEventListener("open", this.onConnect);
-    this.ws.addEventListener("message", this.handleMessage);
-    this.canvas.onFrameUpdate(this.onCanvasUpdate);
+    this.csrfToken = "";
+    const url = new URL("ws://localhost:8080/whiteboard");
+
+    this.initSession().then(() => {
+      this.ws = new WebSocket(url);
+      this.ws.addEventListener("open", this.onConnect);
+      this.ws.addEventListener("message", this.handleMessage);
+      this.ws.binaryType = "arraybuffer";
+      this.canvas.onFrameUpdate(this.onCanvasUpdate);
+
+      this.config.eventListeners.forEach((listener) => {
+        this.eventEmitter.on(listener.name, listener.callback);
+      });
+    });
   }
 
   private initSession = async (): Promise<void> => {
@@ -67,6 +70,13 @@ export class WhiteboardClient {
 
   private onConnect = (): void => {
     this.ws.send(
+      JSON.stringify({
+        timestamp: Date.now(),
+        name: "session.getDetails",
+        payload: null,
+      } as AppEvent<null>),
+    );
+    this.ws.send(
       this.messageConverter.toBytes({
         timestamp: Date.now(),
         name: "canvas.getCanvas",
@@ -77,7 +87,12 @@ export class WhiteboardClient {
 
   private handleMessage = (message: MessageEvent): void => {
     console.log(message);
-    const event = this.messageConverter.fromBytes(message.data);
+    let event;
+    if (typeof message.data === "string") {
+      event = JSON.parse(message.data);
+    } else {
+      event = this.messageConverter.fromBytes(message.data);
+    }
     this.eventEmitter.emit(event.name, event, this);
   };
 
@@ -89,8 +104,6 @@ export class WhiteboardClient {
     };
     this.eventEmitter.emit(event.name, event, this);
   };
-
-  getSessionDetails = async (): Promise<AppSession> => {};
 
   send = (event: AppEvent<ArrayBuffer>): void => {
     this.ws.send(this.messageConverter.toBytes(event));

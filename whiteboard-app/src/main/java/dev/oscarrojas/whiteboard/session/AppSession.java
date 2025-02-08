@@ -1,11 +1,12 @@
 package dev.oscarrojas.whiteboard.session;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.oscarrojas.whiteboard.canvas.Canvas;
-import dev.oscarrojas.whiteboard.messaging.AppEvent;
+import dev.oscarrojas.whiteboard.messaging.BinaryAppEvent;
+import dev.oscarrojas.whiteboard.messaging.JsonAppEvent;
 import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,26 +15,32 @@ import java.util.Map;
 
 public class AppSession {
 
+    private final Canvas canvas;
+    private final AppEventBinaryConverter converter;
+    private final ObjectMapper mapper;
     private String id;
-    private Canvas canvas;
-    private AppEventBinaryConverter converter;
     private Map<String, WebSocketSession> connections = new HashMap<>();
 
-    public AppSession(String id, Canvas canvas, AppEventBinaryConverter converter) {
+    public AppSession(
+        String id, Canvas canvas, AppEventBinaryConverter converter,
+        ObjectMapper mapper
+    ) {
         this.id = id;
         this.canvas = canvas;
         this.converter = converter;
+        this.mapper = mapper;
     }
 
     public AppSession(
         String id, Canvas canvas,
-        Map<String, WebSocketSession> connections, AppEventBinaryConverter converter
+        Map<String, WebSocketSession> connections, AppEventBinaryConverter converter,
+        ObjectMapper mapper
     ) {
         this.id = id;
         this.canvas = canvas;
         this.connections = new HashMap<>(connections);
         this.converter = converter;
-
+        this.mapper = mapper;
     }
 
     public AppSession(AppSession session) {
@@ -41,6 +48,7 @@ public class AppSession {
         this.canvas = new Canvas(session.getCanvas());
         this.connections = new HashMap<>(session.getConnections());
         this.converter = session.getConverter();
+        this.mapper = session.getMapper();
     }
 
     public String getId() {
@@ -59,6 +67,10 @@ public class AppSession {
         return converter;
     }
 
+    public ObjectMapper getMapper() {
+        return this.mapper;
+    }
+
     public Map<String, WebSocketSession> getConnections() {
         return connections;
     }
@@ -75,11 +87,17 @@ public class AppSession {
         return connections.size();
     }
 
-    public void broadcastEvent(AppEvent event) throws IOException {
+    public AppSessionDetails getDetails() {
+        List<String> users = connections.values().stream()
+            .map(ws -> ((String) ws.getAttributes().get("username"))).toList();
+        return new AppSessionDetails(id, users);
+    }
+
+    public void broadcastEvent(BinaryAppEvent event) throws IOException {
         broadcastEvent(event, List.of());
     }
 
-    public void broadcastEvent(AppEvent event, List<String> exclude) {
+    public void broadcastEvent(BinaryAppEvent event, List<String> exclude) {
         BinaryMessage binaryMessage = new BinaryMessage(converter.toBytes(event));
 
         for (WebSocketSession connection : connections.values()) {
@@ -93,7 +111,7 @@ public class AppSession {
         }
     }
 
-    public void sendEvent(String connectionId, AppEvent event) {
+    public void sendEvent(String connectionId, BinaryAppEvent event) {
         WebSocketSession connection = connections.get(connectionId);
 
         if (connection == null) {
@@ -109,11 +127,34 @@ public class AppSession {
         }
     }
 
+    public void sendEvent(String connectionId, JsonAppEvent event) {
+        WebSocketSession connection = connections.get(connectionId);
+
+        if (connection == null) {
+            return;
+        }
+
+        TextMessage message;
+
+        try {
+            message = new TextMessage(mapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            // TODO: handle exception
+            throw new RuntimeException(e);
+        }
+
+        if (connection.isOpen()) {
+            trySendEvent(connection, message);
+        } else {
+            WebSocketSession ws = removeConnection(connection);
+        }
+    }
+
     public WebSocketSession removeConnection(WebSocketSession ws) {
         return connections.remove(ws.getId());
     }
 
-    private void trySendEvent(WebSocketSession ws, BinaryMessage message) {
+    private void trySendEvent(WebSocketSession ws, WebSocketMessage<?> message) {
         try {
             ws.sendMessage(message);
         } catch (IOException e) {

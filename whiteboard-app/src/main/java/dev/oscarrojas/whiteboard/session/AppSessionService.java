@@ -1,5 +1,6 @@
 package dev.oscarrojas.whiteboard.session;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.oscarrojas.whiteboard.canvas.Canvas;
 import dev.oscarrojas.whiteboard.ws.protocol.AppEventBinaryConverter;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,15 @@ public class AppSessionService {
 
     private AppSessionDao sessionDao;
     private AppEventBinaryConverter converter;
+    private ObjectMapper mapper;
 
-    AppSessionService(AppSessionDao sessionDao, AppEventBinaryConverter converter) {
+    AppSessionService(
+        AppSessionDao sessionDao, AppEventBinaryConverter converter,
+        ObjectMapper mapper
+    ) {
         this.sessionDao = sessionDao;
         this.converter = converter;
+        this.mapper = mapper;
     }
 
     public Optional<AppSession> getSession(String sessionId) {
@@ -71,7 +77,8 @@ public class AppSessionService {
             optimalSession = new AppSession(
                 UUID.randomUUID().toString(),
                 new Canvas(1000, 1000),
-                converter
+                converter,
+                mapper
             );
         }
 

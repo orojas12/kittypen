@@ -1,7 +1,7 @@
 package dev.oscarrojas.whiteboard.canvas;
 
-import dev.oscarrojas.whiteboard.messaging.AppEvent;
 import dev.oscarrojas.whiteboard.messaging.AppEventListener;
+import dev.oscarrojas.whiteboard.messaging.BinaryAppEvent;
 import dev.oscarrojas.whiteboard.messaging.annotation.Event;
 import dev.oscarrojas.whiteboard.session.AppSession;
 import dev.oscarrojas.whiteboard.session.AppSessionService;
@@ -21,7 +21,7 @@ public class CanvasEventListener extends AppEventListener {
     }
 
     @Event("canvas.putFrame")
-    public void putFrame(AppEvent event, WebSocketSession ws) {
+    public void putFrame(BinaryAppEvent event, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
         Canvas canvas = session.getCanvas();
         CanvasFrame frame = converter.fromBytes(event.getPayload());
@@ -31,11 +31,11 @@ public class CanvasEventListener extends AppEventListener {
     }
 
     @Event("canvas.getCanvas")
-    public void getCanvas(AppEvent event, WebSocketSession ws) {
+    public void getCanvas(BinaryAppEvent event, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
         Canvas canvas = session.getCanvas();
         CanvasFrame frame = canvas.getFrame();
         byte[] payload = converter.toBytes(frame);
-        session.sendEvent(ws.getId(), new AppEvent("canvas.putFrame", payload));
+        session.sendEvent(ws.getId(), new BinaryAppEvent("canvas.putFrame", payload));
     }
 }
