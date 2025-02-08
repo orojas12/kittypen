@@ -8,6 +8,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 import java.util.List;
 
@@ -25,7 +26,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
         for (BinaryWebSocketHandler handler : webSocketHandlers) {
-            registry.addHandler(handler, "/").setAllowedOrigins("http://localhost:5173");
+            registry.addHandler(handler, "/whiteboard")
+                .addInterceptors(new HttpSessionHandshakeInterceptor())
+                .setAllowedOrigins("http://localhost:5173");
         }
     }
 
