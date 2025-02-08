@@ -30,9 +30,12 @@ public class CanvasEventListener extends AppEventListener {
         sessionService.saveSession(session);
     }
 
-    @Event("canvas.getFrame")
-    public void getFrame(AppEvent event, WebSocketSession ws) {
+    @Event("canvas.getCanvas")
+    public void getCanvas(AppEvent event, WebSocketSession ws) {
         AppSession session = sessionService.getSession(ws);
-
+        Canvas canvas = session.getCanvas();
+        CanvasFrame frame = canvas.getFrame();
+        byte[] payload = converter.toBytes(frame);
+        session.sendEvent(ws.getId(), new AppEvent("canvas.putFrame", payload));
     }
 }

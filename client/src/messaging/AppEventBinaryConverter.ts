@@ -8,9 +8,9 @@ export default class AppEventBinaryConverter {
   utf8Encoder = new TextEncoder();
   utf8Decoder = new TextDecoder();
 
-  toBytes = (event: AppEvent): ArrayBuffer => {
+  toBytes = (event: AppEvent<ArrayBuffer | null>): ArrayBuffer => {
     const nameBytes: Uint8Array = this.utf8Encoder.encode(event.name);
-    const payloadBytes = new Uint8Array(event.payload);
+    const payloadBytes = event.payload ? new Uint8Array(event.payload) : null;
 
     // create buffer
     const view = new DataView(
@@ -19,7 +19,7 @@ export default class AppEventBinaryConverter {
           NAME_HEADER_BYTES +
           nameBytes.length +
           PAYLOAD_HEADER_BYTES +
-          payloadBytes.length,
+          (payloadBytes?.length || 0),
       ),
     );
 
@@ -38,20 +38,24 @@ export default class AppEventBinaryConverter {
     }
 
     // write payload header
-    view.setUint32(bytePos, payloadBytes.length);
-    bytePos += 4;
-
-    // write payload bytes
-    for (let i = 0; i < payloadBytes.length; i++) {
-      view.setUint8(bytePos++, payloadBytes[i]);
+    if (payloadBytes) {
+      view.setUint32(bytePos, payloadBytes.length);
+      bytePos += 4;
+      // write payload bytes
+      for (let i = 0; i < payloadBytes.length; i++) {
+        view.setUint8(bytePos++, payloadBytes[i]);
+      }
+    } else {
+      view.setUint32(bytePos, 0);
+      bytePos += 4;
     }
 
     return view.buffer;
   };
 
-  fromBytes = (bytes: ArrayBuffer): AppEvent => {
+  fromBytes = (bytes: ArrayBuffer): AppEvent<ArrayBuffer | null> => {
     const view = new DataView(bytes);
-    const event = {} as AppEvent;
+    const event = {} as AppEvent<ArrayBuffer | null>;
     let bufPos = 0;
 
     // extract timestamp
@@ -73,11 +77,15 @@ export default class AppEventBinaryConverter {
     bufPos += 4;
 
     // extract payload
-    const payload = new Uint8Array(payloadByteLength);
-    for (let i = 0; i < payloadByteLength; i++) {
-      payload[i] = view.getUint8(bufPos++);
+    if (payloadByteLength > 0) {
+      const payload = new Uint8Array(payloadByteLength);
+      for (let i = 0; i < payloadByteLength; i++) {
+        payload[i] = view.getUint8(bufPos++);
+      }
+      event.payload = payload.buffer;
+    } else {
+      event.payload = null;
     }
-    event.payload = payload.buffer;
 
     return event;
   };

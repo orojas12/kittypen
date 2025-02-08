@@ -19,9 +19,20 @@ export class WhiteboardClient {
     this.canvas = canvas;
     this.messageConverter = new AppEventBinaryConverter();
 
+    this.ws.addEventListener("open", this.onConnect);
     this.ws.addEventListener("message", this.handleMessage);
     this.canvas.onFrameUpdate(this.onCanvasUpdate);
   }
+
+  private onConnect = (): void => {
+    this.ws.send(
+      this.messageConverter.toBytes({
+        timestamp: Date.now(),
+        name: "canvas.getCanvas",
+        payload: null,
+      }),
+    );
+  };
 
   private handleMessage = (message: MessageEvent): void => {
     console.log(message);

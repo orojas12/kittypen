@@ -70,6 +70,25 @@ public class Canvas {
     }
 
     /**
+     * Returns the entire array of image data for the canvas.
+     *
+     * @return full canvas image data
+     */
+    public byte[] getData() {
+        return data;
+    }
+
+    public CanvasFrame getFrame() {
+        return new CanvasFrame(
+            0,
+            0,
+            this.width,
+            this.height,
+            getData()
+        );
+    }
+
+    /**
      * Returns a byte array representing the underlying image data for a specified
      * portion of the canvas.
      *
@@ -77,6 +96,7 @@ public class Canvas {
      * @param y      starting y position
      * @param width  rectangle width
      * @param height rectangle height
+     * @return specified portion of canvas image data
      */
     byte[] getData(int x, int y, int width, int height) {
         byte[] data = new byte[width * height * 4];
@@ -96,10 +116,6 @@ public class Canvas {
 
     void reset() {
         Arrays.fill(data, (byte) 0);
-    }
-
-    public byte[] getData() {
-        return data;
     }
 
     public Instant getLastUpdated() {
