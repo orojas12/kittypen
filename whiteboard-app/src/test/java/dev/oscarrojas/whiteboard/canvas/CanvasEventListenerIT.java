@@ -44,7 +44,7 @@ class CanvasEventListenerIT {
     }
 
     @Test
-    void update_broadcastsUpdateToOtherConnections() throws IOException {
+    void putFrame_broadcastsFrameToOtherConnections() throws IOException {
         WebSocketSession ws1 = mock(StandardWebSocketSession.class);
         WebSocketSession ws2 = mock(StandardWebSocketSession.class);
         when(ws1.getId()).thenReturn("ws1");
@@ -61,8 +61,8 @@ class CanvasEventListenerIT {
 
         CanvasFrameBinaryConverter frameConverter = new CanvasFrameBinaryConverter();
         CanvasFrame frame = new CanvasFrame(0, 0, 1, 1, new byte[]{1, 1, 1, 1});
-        AppEvent event = new AppEvent("canvas.update", frameConverter.toBytes(frame));
-        listener.update(event, ws1);
+        AppEvent event = new AppEvent("canvas.putFrame", frameConverter.toBytes(frame));
+        listener.putFrame(event, ws1);
 
         verify(ws1, times(0)).sendMessage(any());
         verify(ws2, times(1)).sendMessage(argThat((arg) -> {
@@ -83,7 +83,7 @@ class CanvasEventListenerIT {
     }
 
     @Test
-    void update_updatesCanvasData() {
+    void putFrame_updatesCanvasData() {
         WebSocketSession ws = mock(StandardWebSocketSession.class);
         when(ws.getId()).thenReturn("ws1");
         AppSession session = new AppSession(
@@ -95,15 +95,17 @@ class CanvasEventListenerIT {
         sessionDao.save(session);
         CanvasFrameBinaryConverter frameConverter = new CanvasFrameBinaryConverter();
         CanvasFrame frame = new CanvasFrame(0, 0, 1, 1, new byte[]{1, 1, 1, 1});
-        AppEvent event = new AppEvent("canvas.update", frameConverter.toBytes(frame));
+        AppEvent event = new AppEvent("canvas.putFrame", frameConverter.toBytes(frame));
 
-        listener.update(event, ws);
+        listener.putFrame(event, ws);
         session = service.getSession(session.getId()).get();
 
         byte[] data = session.getCanvas().getData();
 
+        assertEquals(4, data.length);
+
         for (int i = 0; i < data.length; i++) {
-            assertEquals(event.getPayload()[i], data[i]);
+            assertEquals(frame.getData()[i], data[i]);
         }
     }
 
