@@ -1,8 +1,7 @@
 package dev.oscarrojas.kittypen.room;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.oscarrojas.kittypen.canvas.Canvas;
-import dev.oscarrojas.kittypen.ws.protocol.EventMapper;
+import dev.oscarrojas.kittypen.ws.protocol.WebSocketEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -14,12 +13,16 @@ import java.util.UUID;
 @Component
 public class RoomService {
 
-    private RoomDao dao;
-    private EventMapper mapper;
+    private final RoomDao dao;
+    private final BasicRoomFactory roomFactory;
 
-    public RoomService(RoomDao dao, ObjectMapper objectMapper) {
+    public RoomService(RoomDao dao, BasicRoomFactory roomFactory) {
         this.dao = dao;
-        this.mapper = new EventMapper(objectMapper);
+        this.roomFactory = roomFactory;
+    }
+
+    public void handleClientEvent(WebSocketEvent<?> webSocketEvent, WebSocketSession client) {
+
     }
 
     public Optional<Room> getRoom(String roomId) {
@@ -32,7 +35,7 @@ public class RoomService {
                 state.getCanvasHeight(),
                 state.getCanvasData()
             );
-            Room room = new BasicRoom(state.getId(), canvas, state.getClients(), mapper);
+            Room room = roomFactory.createRoom(state.getId(), canvas, state.getClients());
             return Optional.of(room);
         } else {
             return Optional.empty();
@@ -58,11 +61,10 @@ public class RoomService {
                 state.getCanvasHeight(),
                 state.getCanvasData()
             );
-            room = new BasicRoom(
+            room = roomFactory.createRoom(
                 state.getId(),
                 canvas,
-                state.getClients(),
-                mapper
+                state.getClients()
             );
         } else {
             room = findAvailableRoom();
@@ -106,11 +108,10 @@ public class RoomService {
             optimalRoom.getCanvasData()
         );
 
-        return new BasicRoom(
+        return roomFactory.createRoom(
             optimalRoom.getId(),
             canvas,
-            optimalRoom.getClients(),
-            mapper
+            optimalRoom.getClients()
         );
     }
 

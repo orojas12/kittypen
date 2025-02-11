@@ -1,10 +1,7 @@
 package dev.oscarrojas.kittypen.room;
 
 import dev.oscarrojas.kittypen.canvas.Canvas;
-import dev.oscarrojas.kittypen.ws.protocol.Event;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.util.List;
 import java.util.Set;
 
 public interface Room {
@@ -13,20 +10,12 @@ public interface Room {
 
     Canvas getCanvas();
 
-    Set<WebSocketSession> getClients();
+    Set<String> getClients();
 
-    void addClient(WebSocketSession ws);
+    void addClient(String clientId);
 
     boolean hasClient(String clientId);
 
-    RoomState getState();
-
-    void handleClientEvent(Event<?> event, WebSocketSession client);
-
-    void broadcastEvent(Event<?> event, List<String> exclude);
-
-    void sendEvent(String clientId, Event<?> event);
-
-    WebSocketSession removeClient(WebSocketSession ws);
+    void removeClient(String clientId);
 
 }

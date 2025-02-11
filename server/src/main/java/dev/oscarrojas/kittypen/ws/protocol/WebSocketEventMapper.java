@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.Map;
 
 @Component
-public class EventMapper {
+public class WebSocketEventMapper {
 
     private static final int TIMESTAMP_HEADER_BYTES = 1;
     private static final int NAME_HEADER_BYTES = 1;
@@ -18,14 +18,15 @@ public class EventMapper {
 
     private ObjectMapper jsonMapper;
 
-    public EventMapper(ObjectMapper mapper) {
+    public WebSocketEventMapper(ObjectMapper mapper) {
         this.jsonMapper = mapper;
     }
 
-    public byte[] toBytes(Event<byte[]> event) {
-        byte[] timestampBytes = event.getTimestamp().toString().getBytes(StandardCharsets.UTF_8);
-        byte[] nameBytes = event.getName().getBytes(StandardCharsets.UTF_8);
-        byte[] payloadBytes = event.getPayload();
+    public byte[] toBytes(WebSocketEvent<byte[]> webSocketEvent) {
+        byte[] timestampBytes = webSocketEvent.getTimestamp().toString()
+            .getBytes(StandardCharsets.UTF_8);
+        byte[] nameBytes = webSocketEvent.getName().getBytes(StandardCharsets.UTF_8);
+        byte[] payloadBytes = webSocketEvent.getPayload();
 
         byte[] eventBytes = new byte[
             TIMESTAMP_HEADER_BYTES
@@ -58,12 +59,12 @@ public class EventMapper {
         return buffer.array();
     }
 
-    public Event<byte[]> fromBytes(ByteBuffer buffer) {
+    public WebSocketEvent<byte[]> fromBytes(ByteBuffer buffer) {
         if (buffer.position() != 0) {
             buffer.rewind();
         }
 
-        Event<byte[]> event = new Event<>();
+        WebSocketEvent<byte[]> webSocketEvent = new WebSocketEvent<>();
 
         try {
 
@@ -75,7 +76,8 @@ public class EventMapper {
             for (int i = 0; i < timestampLength; i++) {
                 timestampBytes[i] = buffer.get();
             }
-            event.setTimestamp(Instant.parse(new String(timestampBytes, StandardCharsets.UTF_8)));
+            webSocketEvent.setTimestamp(
+                Instant.parse(new String(timestampBytes, StandardCharsets.UTF_8)));
 
             // extract name header
             int nameLength = buffer.get() & 0xFF;
@@ -85,7 +87,7 @@ public class EventMapper {
             for (int i = 0; i < nameLength; i++) {
                 name[i] = buffer.get();
             }
-            event.setName(new String(name, StandardCharsets.UTF_8));
+            webSocketEvent.setName(new String(name, StandardCharsets.UTF_8));
 
             // extract payload header
             int payloadLength = buffer.getInt();
@@ -107,27 +109,32 @@ public class EventMapper {
             for (int i = 0; i < payloadLength; i++) {
                 payload[i] = buffer.get();
             }
-            event.setPayload(payload);
+            webSocketEvent.setPayload(payload);
 
         } catch (IndexOutOfBoundsException e) {
             throw new BinaryDecodingException(
                 "Unexpected end of buffer: \n" + e.getMessage());
         }
 
-        return event;
+        return webSocketEvent;
 
     }
 
-    public Event<byte[]> fromBytes(byte[] bytes) {
+    public WebSocketEvent<byte[]> fromBytes(byte[] bytes) {
         return fromBytes(ByteBuffer.wrap(bytes));
     }
 
-    public String toJson(Event<Map<String, Object>> event) throws JsonProcessingException {
-        return jsonMapper.writeValueAsString(event);
+    public String toJson(
+        WebSocketEvent<Map<String, Object>> webSocketEvent
+    ) throws JsonProcessingException {
+        return jsonMapper.writeValueAsString(webSocketEvent);
     }
 
-    public Event<Map<String, Object>> fromJson(String json) throws JsonProcessingException {
-        return (Event<Map<String, Object>>) jsonMapper.readValue(json, Event.class);
+    public WebSocketEvent<Map<String, Object>> fromJson(
+        String json
+    ) throws JsonProcessingException {
+        return (WebSocketEvent<Map<String, Object>>) jsonMapper.readValue(
+            json, WebSocketEvent.class);
     }
 
 }

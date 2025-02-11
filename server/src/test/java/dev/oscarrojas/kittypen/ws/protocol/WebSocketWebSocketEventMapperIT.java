@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-public class EventMapperIT {
+public class WebSocketWebSocketEventMapperIT {
 
     @Autowired
     ObjectMapper objectMapper;
@@ -32,10 +32,10 @@ public class EventMapperIT {
         payload[5] = (byte) 109;
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
-        EventMapper mapper = new EventMapper(objectMapper);
-        Event<byte[]> event = new Event<>(timestamp, name, payload);
+        WebSocketEventMapper mapper = new WebSocketEventMapper(objectMapper);
+        WebSocketEvent<byte[]> webSocketEvent = new WebSocketEvent<>(timestamp, name, payload);
 
-        byte[] result = mapper.toBytes(event);
+        byte[] result = mapper.toBytes(webSocketEvent);
         ByteBuffer buffer = ByteBuffer.wrap(result);
 
         // result timestamp header == timestamp byte length
@@ -88,14 +88,14 @@ public class EventMapperIT {
         payload[5] = (byte) 109;
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
-        EventMapper mapper = new EventMapper(objectMapper);
-        Event<byte[]> event = new Event<>(timestamp, name, payload);
-        byte[] eventBytes = mapper.toBytes(event);
+        WebSocketEventMapper mapper = new WebSocketEventMapper(objectMapper);
+        WebSocketEvent<byte[]> webSocketEvent = new WebSocketEvent<>(timestamp, name, payload);
+        byte[] eventBytes = mapper.toBytes(webSocketEvent);
 
-        Event<byte[]> result = mapper.fromBytes(eventBytes);
+        WebSocketEvent<byte[]> result = mapper.fromBytes(eventBytes);
 
         // decoded timestamp == original timestamp
-        assertEquals(event.getTimestamp(), result.getTimestamp());
+        assertEquals(webSocketEvent.getTimestamp(), result.getTimestamp());
 
         // decoded name == original name
         assertEquals(name, result.getName());

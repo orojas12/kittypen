@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BinaryAppEventBinaryConverterTest {
+public class BinaryAppWebSocketEventBinaryConverterTest {
 
     @Test
     void toBytes() {

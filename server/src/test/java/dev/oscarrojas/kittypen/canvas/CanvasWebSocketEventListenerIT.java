@@ -24,7 +24,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext
-class CanvasEventListenerIT {
+class CanvasWebSocketEventListenerIT {
 
     @Autowired
     AppSessionService service;

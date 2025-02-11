@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class BinaryAppEventEmitterIT {
+class BinaryAppWebSocketEventEmitterIT {
 
     @Autowired
     AppEventEmitter emitter;

@@ -2,6 +2,7 @@ package dev.oscarrojas.kittypen.config;
 
 import dev.oscarrojas.kittypen.messaging.AppEventEmitter;
 import dev.oscarrojas.kittypen.messaging.AppEventListener;
+import dev.oscarrojas.kittypen.ws.protocol.WebSocketEventMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -18,25 +19,6 @@ public class AppConfig {
         return new SimpleAsyncTaskExecutor();
     }
 
-//    @Bean
-//    public AppMessageBroker messageBroker(List<AppMessageConsumer> consumers) {
-//        AppMessageBroker broker = new AppMessageBroker();
-//
-//        for (AppMessageConsumer consumer : consumers) {
-//            Channel channel = consumer.getClass()
-//                .getDeclaredAnnotation(Channel.class);
-//
-//            if (channel == null) {
-//                // TODO: log non-annotated consumer
-//                continue;
-//            }
-//
-//            broker.subscribe(channel.value(), consumer);
-//        }
-//
-//        return broker;
-//    }
-
     @Bean
     public AppEventEmitter eventEmitter(List<AppEventListener> listeners) {
         AppEventEmitter emitter = new AppEventEmitter();
@@ -49,5 +31,13 @@ public class AppConfig {
         }
 
         return emitter;
+    }
+
+    @Bean
+    public BasicRoomFactory basicRoomFactory(WebSocketEventMapper mapper) {
+        BasicRoomFactory factory = new BasicRoomFactory();
+        factory.setEventMapper(mapper);
+        factory.setEventStrategy(new BasicRoomStrategy());
+        return factory;
     }
 }

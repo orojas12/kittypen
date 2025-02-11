@@ -1,87 +1,50 @@
 package dev.oscarrojas.kittypen.ws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.oscarrojas.kittypen.messaging.AppEventEmitter;
-import dev.oscarrojas.kittypen.messaging.BinaryAppEvent;
-import dev.oscarrojas.kittypen.messaging.JsonAppEvent;
-import dev.oscarrojas.kittypen.session.AppSession;
-import dev.oscarrojas.kittypen.session.AppSessionService;
-import dev.oscarrojas.kittypen.ws.protocol.AppEventBinaryConverter;
-import dev.oscarrojas.kittypen.ws.protocol.BinaryDecodingException;
+import dev.oscarrojas.kittypen.room.RoomService;
+import dev.oscarrojas.kittypen.ws.protocol.WebSocketEvent;
+import dev.oscarrojas.kittypen.ws.protocol.WebSocketEventMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
-import java.io.IOException;
-import java.util.Optional;
+import java.util.Map;
 
 @Component
 public class WebSocketMessageHandler extends BinaryWebSocketHandler {
 
-    private AppEventEmitter eventEmitter;
-    private AppSessionService sessionService;
-    private AppEventBinaryConverter converter;
-    private ObjectMapper jsonMapper;
+    private final RoomService roomService;
+    private final WebSocketEventMapper mapper;
 
     public WebSocketMessageHandler(
-        AppEventEmitter eventEmitter,
-        AppSessionService sessionService,
-        AppEventBinaryConverter converter,
-        ObjectMapper jsonMapper
+        RoomService roomService,
+        WebSocketEventMapper mapper
     ) {
-        this.eventEmitter = eventEmitter;
-        this.sessionService = sessionService;
-        this.converter = converter;
-        this.jsonMapper = jsonMapper;
+        this.roomService = roomService;
+        this.mapper = mapper;
     }
 
     @Override
-    protected void handleBinaryMessage(
-        WebSocketSession ws, BinaryMessage message) {
-
-        BinaryAppEvent event;
-        try {
-            event = converter.fromBytes(message.getPayload());
-        } catch (BinaryDecodingException e) {
-            tryCloseWithStatus(ws, CloseStatus.PROTOCOL_ERROR);
-            return;
-        }
-
-        eventEmitter.emit(event.getName(), event, ws);
+    protected void handleBinaryMessage(WebSocketSession ws, BinaryMessage message) {
+        WebSocketEvent<byte[]> webSocketEvent = mapper.fromBytes(message.getPayload());
+        roomService.handleClientEvent(webSocketEvent, ws);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession ws, TextMessage message) {
+        WebSocketEvent<Map<String, Object>> webSocketEvent;
+
         try {
-            JsonAppEvent event = jsonMapper.readValue(
-                message.getPayload(),
-                JsonAppEvent.class
-            );
-            eventEmitter.emit(event.getName(), event, ws);
+            webSocketEvent = mapper.fromJson(message.getPayload());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            // TODO: log critical error
+            System.out.println(e.getMessage());
+            return;
         }
+
+        roomService.handleClientEvent(webSocketEvent, ws);
     }
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession ws) {
-        // register new connection to an available session
-        sessionService.getSession(ws);
-    }
-
-    private void tryCloseWithStatus(WebSocketSession ws, CloseStatus status) {
-        try {
-            ws.close(status);
-        } catch (IOException e) {
-            // ignore
-        } finally {
-            // clean up dead connection
-            Optional<AppSession> session = sessionService.getSession(ws.getId());
-            session.ifPresent(appSession -> appSession.removeConnection(ws));
-        }
-    }
 }
