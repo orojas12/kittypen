@@ -110,24 +110,34 @@ export class Canvas {
   };
 
   private handlePointerEvent = (event: PointerEvent): void => {
-    const domRect = this.ctx.canvas.getBoundingClientRect();
+    console.log(event.type);
 
     if (event.type === "pointerdown") {
-      this.pointer.isPressed = true;
+      this.pointer.x = this.getPointerX(event);
+      this.pointer.y = this.getPointerY(event);
       this.pointer.prevX = this.pointer.x;
       this.pointer.prevY = this.pointer.y;
+      this.pointer.isPressed = true;
     } else if (event.type === "pointerup") {
       this.pointer.isPressed = false;
-    } else {
-      this.pointer.x = event.pageX - domRect.left;
-      this.pointer.y = event.pageY - domRect.top;
-
-      const scaleX = this.pointer.x / domRect.width;
-      const scaleY = this.pointer.y / domRect.height;
-
-      this.pointer.x = Math.trunc(this.config.width * scaleX) + 0.5;
-      this.pointer.y = Math.trunc(this.config.height * scaleY) + 0.5;
+    } else if (event.type === "pointermove") {
+      this.pointer.x = this.getPointerX(event);
+      this.pointer.y = this.getPointerY(event);
     }
+  };
+
+  private getPointerX = (event: PointerEvent): number => {
+    const domRect = this.ctx.canvas.getBoundingClientRect();
+    const x = event.pageX - domRect.left;
+    const scaleX = x / domRect.width;
+    return Math.trunc(this.config.width * scaleX) + 0.5;
+  };
+
+  private getPointerY = (event: PointerEvent): number => {
+    const domRect = this.ctx.canvas.getBoundingClientRect();
+    const y = event.pageY - domRect.top;
+    const scaleY = y / domRect.height;
+    return Math.trunc(this.config.height * scaleY) + 0.5;
   };
 
   private draw = (): void => {

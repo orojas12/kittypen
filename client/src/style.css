@@ -52,6 +52,7 @@ body {
 }
 
 .canvas {
+  touch-action: none;
   aspect-ratio: 1;
   width: 720px;
   image-rendering: pixelated;
