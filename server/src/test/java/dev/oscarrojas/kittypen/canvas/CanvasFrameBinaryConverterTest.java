@@ -1,5 +1,7 @@
 package dev.oscarrojas.kittypen.canvas;
 
+import dev.oscarrojas.kittypen.core.canvas.CanvasFrame;
+import dev.oscarrojas.kittypen.core.canvas.CanvasFrameBinaryConverter;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;

@@ -1,6 +1,6 @@
 package dev.oscarrojas.kittypen.config;
 
-import dev.oscarrojas.kittypen.ws.protocol.AppEventBinaryConverter;
+import dev.oscarrojas.kittypen.websocket.protocol.AppEventBinaryConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
