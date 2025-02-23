@@ -1,7 +1,5 @@
 package dev.oscarrojas.kittypen.core.io;
 
-import dev.oscarrojas.kittypen.core.client.ClientDetails;
-
 import java.util.Optional;
 
 public interface CommandRequestStrategy {
@@ -10,5 +8,4 @@ public interface CommandRequestStrategy {
 
     Optional<CommandResponse<?>> handleCommandRequest(CommandRequest<?> command);
 
-    void registerClient(ClientDetails clientDetails);
 }

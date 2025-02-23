@@ -1,13 +1,13 @@
-package dev.oscarrojas.kittypen.drawing;
+package dev.oscarrojas.kittypen.drawingcanvas;
 
 import dev.oscarrojas.kittypen.core.RoomService;
 import dev.oscarrojas.kittypen.core.io.Command;
 import dev.oscarrojas.kittypen.core.io.CommandRequest;
 import dev.oscarrojas.kittypen.core.io.CommandRequestStrategy;
 import dev.oscarrojas.kittypen.core.io.CommandResponse;
-import dev.oscarrojas.kittypen.drawing.commands.DrawCanvasFrameCommand;
-import dev.oscarrojas.kittypen.drawing.commands.RegisterClientCommand;
-import dev.oscarrojas.kittypen.drawing.commands.RemoveClientCommand;
+import dev.oscarrojas.kittypen.drawingcanvas.commands.DrawCanvasFrameCommand;
+import dev.oscarrojas.kittypen.drawingcanvas.commands.RegisterClientCommand;
+import dev.oscarrojas.kittypen.drawingcanvas.commands.RemoveClientCommand;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -15,13 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class BasicDrawingRequestStrategy implements CommandRequestStrategy {
+public class DrawingCanvasRequestStrategy implements CommandRequestStrategy {
 
-    private final static String name = "drawing_basic";
+    final static String name = "drawing_canvas";
 
     private final Map<String, Command> commandMap = new HashMap<>();
 
-    public BasicDrawingRequestStrategy(RoomService roomService) {
+    public DrawingCanvasRequestStrategy(RoomService roomService) {
         addCommand(new RegisterClientCommand(roomService));
         addCommand(new RemoveClientCommand(roomService));
         addCommand(new DrawCanvasFrameCommand(roomService));
@@ -50,4 +50,5 @@ public class BasicDrawingRequestStrategy implements CommandRequestStrategy {
 
         return response;
     }
+
 }

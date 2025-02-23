@@ -1,4 +1,4 @@
-package dev.oscarrojas.kittypen.drawing.commands;
+package dev.oscarrojas.kittypen.drawingcanvas.commands;
 
 import dev.oscarrojas.kittypen.core.Room;
 import dev.oscarrojas.kittypen.core.RoomService;
@@ -53,10 +53,8 @@ public class DrawCanvasFrameCommand implements Command {
         }
 
         Room room = roomOpt.get();
-
         Canvas canvas = room.getCanvas();
         canvas.putData(frame);
-
         roomService.saveRoom(room);
 
         Set<String> targetClients = room.getClients().stream()

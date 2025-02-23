@@ -1,13 +1,15 @@
 package dev.oscarrojas.kittypen.core.client;
 
-public class ClientDetails {
+public class ClientRegistration {
 
     private String id;
     private String username;
+    private String registrar;
 
-    public ClientDetails(String id, String username) {
+    public ClientRegistration(String id, String username, String registrar) {
         this.id = id;
         this.username = username;
+        this.registrar = registrar;
     }
 
     public String getId() {
@@ -24,6 +26,14 @@ public class ClientDetails {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRegistrar() {
+        return registrar;
+    }
+
+    public void setRegistrar(String registrar) {
+        this.registrar = registrar;
     }
 
 }

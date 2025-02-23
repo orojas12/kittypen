@@ -13,7 +13,9 @@ public class CommandRequest<T> {
 
     public CommandRequest(
         Instant timestamp,
-        String clientId, String command, @Nullable T payload
+        String clientId,
+        String command,
+        T payload
     ) {
         this.timestamp = timestamp;
         this.clientId = clientId;
@@ -45,7 +47,6 @@ public class CommandRequest<T> {
         this.command = command;
     }
 
-    @Nullable
     public T getPayload() {
         return payload;
     }
