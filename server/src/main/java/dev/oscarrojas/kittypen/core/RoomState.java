@@ -12,15 +12,15 @@ public class RoomState {
     private final int canvasHeight;
     private final byte[] canvasData;
     private final Set<Client> clients;
-    private final String strategy;
+    private final String commandStrategy;
 
-    public RoomState(String id, Canvas canvas, Set<Client> clients, String strategy) {
+    public RoomState(String id, Canvas canvas, Set<Client> clients, String commandStrategy) {
         this.id = id;
         this.canvasWidth = canvas.getWidth();
         this.canvasHeight = canvas.getHeight();
         this.canvasData = canvas.getData();
         this.clients = clients;
-        this.strategy = strategy;
+        this.commandStrategy = commandStrategy;
     }
 
     public String getId() {
@@ -43,7 +43,7 @@ public class RoomState {
         return clients;
     }
 
-    public String getStrategy() {
-        return strategy;
+    public String getCommandStrategy() {
+        return commandStrategy;
     }
 }

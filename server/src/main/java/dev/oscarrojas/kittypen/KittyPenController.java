@@ -45,7 +45,8 @@ public class KittyPenController {
         }
 
         Room room = roomOpt.get();
-        CommandRequestStrategy strategy = strategyFactory.getCommandStrategy(room.getStrategy());
+        CommandRequestStrategy strategy = strategyFactory.getCommandStrategy(
+            room.getCommandStrategy());
 
         if (strategy == null) {
             return Optional.empty();

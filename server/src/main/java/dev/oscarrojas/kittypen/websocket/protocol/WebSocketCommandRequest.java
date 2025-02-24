@@ -2,18 +2,18 @@ package dev.oscarrojas.kittypen.websocket.protocol;
 
 import java.time.Instant;
 
-public class WebSocketCommand<T> {
+public class WebSocketCommandRequest<T> {
     private Instant timestamp;
-    private String name;
+    private String command;
     private T payload;
 
-    public WebSocketCommand(Instant timestamp, String name, T payload) {
+    public WebSocketCommandRequest(Instant timestamp, String command, T payload) {
         this.timestamp = timestamp;
-        this.name = name;
+        this.command = command;
         this.payload = payload;
     }
 
-    public WebSocketCommand() {
+    public WebSocketCommandRequest() {
     }
 
     public Instant getTimestamp() {
@@ -24,12 +24,12 @@ public class WebSocketCommand<T> {
         this.timestamp = timestamp;
     }
 
-    public String getName() {
-        return name;
+    public String getCommand() {
+        return command;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     public T getPayload() {

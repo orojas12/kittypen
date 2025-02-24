@@ -57,7 +57,7 @@ public class BasicRoom implements Room {
     }
 
     @Override
-    public String getStrategy() {
+    public String getCommandStrategy() {
         return strategy;
     }
 }

@@ -25,4 +25,9 @@ public class InMemoryWebSocketSessionRepository implements WebSocketSessionRepos
         return Set.of();
     }
 
+    @Override
+    public void deleteById(String id) {
+
+    }
+
 }

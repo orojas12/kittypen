@@ -1,6 +1,5 @@
 package dev.oscarrojas.kittypen.config;
 
-import dev.oscarrojas.kittypen.websocket.protocol.AppEventBinaryConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -12,11 +11,15 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import java.util.List;
 
+import static dev.oscarrojas.kittypen.websocket.protocol.WebSocketCommandMapper.*;
+
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    private List<BinaryWebSocketHandler> webSocketHandlers;
+    private static final int MAX_PAYLOAD_BYTE_LENGTH = 64000000;
+
+    private final List<BinaryWebSocketHandler> webSocketHandlers;
 
     WebSocketConfig(List<BinaryWebSocketHandler> webSocketHandlers) {
         this.webSocketHandlers = webSocketHandlers;
@@ -35,7 +38,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Bean
     ServletServerContainerFactoryBean createContainer() {
         var container = new ServletServerContainerFactoryBean();
-        container.setMaxBinaryMessageBufferSize(AppEventBinaryConverter.BASE_FRAME_SIZE + 64000000);
+        container.setMaxBinaryMessageBufferSize(
+            TIMESTAMP_HEADER_BYTES
+                + COMMAND_HEADER_BYTES
+                + MAX_COMMAND_BYTES
+                + PAYLOAD_HEADER_BYTES
+                + MAX_PAYLOAD_BYTE_LENGTH
+        );
         return container;
     }
 

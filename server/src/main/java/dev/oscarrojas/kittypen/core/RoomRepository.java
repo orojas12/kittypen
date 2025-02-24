@@ -7,7 +7,7 @@ public interface RoomRepository {
 
     Optional<RoomState> get(String id);
 
-    Optional<RoomState> getByClient(String clientId);
+    Optional<RoomState> getByClientId(String clientId);
 
     /**
      * Finds all rooms with a number of clients within a specified range (inclusive).

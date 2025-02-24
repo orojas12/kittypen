@@ -1,7 +1,7 @@
 package dev.oscarrojas.kittypen.core;
 
+import dev.oscarrojas.kittypen.core.client.Client;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
 import java.util.Map;
@@ -20,12 +20,14 @@ public class InMemoryRoomRepository implements RoomRepository {
     }
 
     @Override
-    public Optional<RoomState> getByClient(WebSocketSession client) {
+    public Optional<RoomState> getByClientId(String clientId) {
         RoomState state = null;
         for (RoomState roomState : rooms.values()) {
-            if (roomState.getClients().contains(client)) {
-                state = roomState;
-                break;
+            for (Client client : roomState.getClients()) {
+                if (client.getId().equals(clientId)) {
+                    state = roomState;
+                    break;
+                }
             }
         }
         return Optional.ofNullable(state);

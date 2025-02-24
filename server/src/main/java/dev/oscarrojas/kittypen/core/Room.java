@@ -19,6 +19,6 @@ public interface Room {
 
     void removeClient(String clientId);
 
-    String getStrategy();
+    String getCommandStrategy();
 
 }

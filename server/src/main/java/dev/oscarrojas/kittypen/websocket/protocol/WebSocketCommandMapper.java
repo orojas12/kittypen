@@ -1,42 +1,42 @@
 package dev.oscarrojas.kittypen.websocket.protocol;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
 
-@Component
 public class WebSocketCommandMapper {
 
-    private static final int TIMESTAMP_HEADER_BYTES = 1;
-    private static final int NAME_HEADER_BYTES = 1;
-    private static final int PAYLOAD_HEADER_BYTES = 4;
+    public static final int TIMESTAMP_HEADER_BYTES = 1;
+    public static final int COMMAND_HEADER_BYTES = 1;
+    public static final int MAX_COMMAND_BYTES = (2 ^ (COMMAND_HEADER_BYTES * 8));
+    public static final int PAYLOAD_HEADER_BYTES = 4;
 
-    private ObjectMapper jsonMapper;
+    private final ObjectMapper mapper;
 
     public WebSocketCommandMapper(ObjectMapper mapper) {
-        this.jsonMapper = mapper;
+        this.mapper = mapper;
     }
 
-    public byte[] toBytes(WebSocketCommand<byte[]> webSocketEvent) {
-        byte[] timestampBytes = webSocketEvent.getTimestamp().toString()
+    public byte[] toBytes(WebSocketCommandRequest<byte[]> request) {
+        byte[] timestampBytes = request.getTimestamp().toString()
             .getBytes(StandardCharsets.UTF_8);
-        byte[] nameBytes = webSocketEvent.getName().getBytes(StandardCharsets.UTF_8);
-        byte[] payloadBytes = webSocketEvent.getPayload();
+        byte[] commandBytes = request.getCommand().getBytes(StandardCharsets.UTF_8);
+        byte[] payloadBytes = request.getPayload();
 
-        byte[] eventBytes = new byte[
+        byte[] bytes = new byte[
             TIMESTAMP_HEADER_BYTES
                 + timestampBytes.length
-                + NAME_HEADER_BYTES
-                + nameBytes.length
+                + COMMAND_HEADER_BYTES
+                + commandBytes.length
                 + PAYLOAD_HEADER_BYTES
                 + payloadBytes.length
             ];
-        ByteBuffer buffer = ByteBuffer.wrap(eventBytes);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
         // write timestamp header
         buffer.put((byte) timestampBytes.length);
@@ -44,11 +44,11 @@ public class WebSocketCommandMapper {
         // write timestamp
         buffer.put(timestampBytes);
 
-        // write name header
-        buffer.put((byte) nameBytes.length);
+        // write command header
+        buffer.put((byte) commandBytes.length);
 
-        // write name bytes
-        buffer.put(nameBytes);
+        // write command bytes
+        buffer.put(commandBytes);
 
         // write payload header
         buffer.putInt(payloadBytes.length);
@@ -59,12 +59,12 @@ public class WebSocketCommandMapper {
         return buffer.array();
     }
 
-    public WebSocketCommand<byte[]> fromBytes(ByteBuffer buffer) {
+    public WebSocketCommandRequest<byte[]> fromBytes(ByteBuffer buffer) {
         if (buffer.position() != 0) {
             buffer.rewind();
         }
 
-        WebSocketCommand<byte[]> webSocketEvent = new WebSocketCommand<>();
+        WebSocketCommandRequest<byte[]> webSocketEvent = new WebSocketCommandRequest<>();
 
         try {
 
@@ -79,15 +79,15 @@ public class WebSocketCommandMapper {
             webSocketEvent.setTimestamp(
                 Instant.parse(new String(timestampBytes, StandardCharsets.UTF_8)));
 
-            // extract name header
-            int nameLength = buffer.get() & 0xFF;
+            // extract command header
+            int commandLength = buffer.get() & 0xFF;
 
-            // extract name
-            byte[] name = new byte[nameLength];
-            for (int i = 0; i < nameLength; i++) {
-                name[i] = buffer.get();
+            // extract command
+            byte[] command = new byte[commandLength];
+            for (int i = 0; i < commandLength; i++) {
+                command[i] = buffer.get();
             }
-            webSocketEvent.setName(new String(name, StandardCharsets.UTF_8));
+            webSocketEvent.setCommand(new String(command, StandardCharsets.UTF_8));
 
             // extract payload header
             int payloadLength = buffer.getInt();
@@ -95,12 +95,12 @@ public class WebSocketCommandMapper {
             // ensure valid input buffer length
             if (TIMESTAMP_HEADER_BYTES
                 + timestampLength
-                + NAME_HEADER_BYTES
-                + nameLength
+                + COMMAND_HEADER_BYTES
+                + commandLength
                 + PAYLOAD_HEADER_BYTES
                 + payloadLength
                 != buffer.capacity()) {
-                throw new BinaryDecodingException(
+                throw new BinaryConverterException(
                     "Unexpected buffer length (headers do not match actual buffer length)");
             }
 
@@ -112,7 +112,7 @@ public class WebSocketCommandMapper {
             webSocketEvent.setPayload(payload);
 
         } catch (IndexOutOfBoundsException e) {
-            throw new BinaryDecodingException(
+            throw new BinaryConverterException(
                 "Unexpected end of buffer: \n" + e.getMessage());
         }
 
@@ -120,21 +120,23 @@ public class WebSocketCommandMapper {
 
     }
 
-    public WebSocketCommand<byte[]> fromBytes(byte[] bytes) {
+    public WebSocketCommandRequest<byte[]> fromBytes(byte[] bytes) {
         return fromBytes(ByteBuffer.wrap(bytes));
     }
 
     public String toJson(
-        WebSocketCommand<Map<String, Object>> webSocketEvent
+        WebSocketCommandRequest<?> webSocketEvent
     ) throws JsonProcessingException {
-        return jsonMapper.writeValueAsString(webSocketEvent);
+        return mapper.writeValueAsString(webSocketEvent);
     }
 
-    public WebSocketCommand<Map<String, Object>> fromJson(
+    public WebSocketCommandRequest<Map<String, Object>> fromJson(
         String json
     ) throws JsonProcessingException {
-        return (WebSocketCommand<Map<String, Object>>) jsonMapper.readValue(
-            json, WebSocketCommand.class);
+        return mapper.readValue(
+            json, new TypeReference<>() {
+            }
+        );
     }
 
 }

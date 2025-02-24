@@ -31,7 +31,7 @@ public class RoomService {
                 state.getId(),
                 canvas,
                 state.getClients(),
-                state.getStrategy()
+                state.getCommandStrategy()
             );
             return Optional.of(room);
         } else {
@@ -48,7 +48,7 @@ public class RoomService {
      * room and returns it if it doesn't belong to one
      */
     public Optional<Room> getClientRoom(String clientId) {
-        Optional<RoomState> stateOpt = repository.getByClient(clientId);
+        Optional<RoomState> stateOpt = repository.getByClientId(clientId);
         Room room = null;
 
         if (stateOpt.isPresent()) {
@@ -62,7 +62,7 @@ public class RoomService {
                 state.getId(),
                 canvas,
                 state.getClients(),
-                state.getStrategy()
+                state.getCommandStrategy()
             );
         }
 
@@ -74,7 +74,7 @@ public class RoomService {
             room.getId(),
             room.getCanvas(),
             room.getClients(),
-            room.getType()
+            room.getCommandStrategy()
         );
     }
 
@@ -85,10 +85,11 @@ public class RoomService {
      *
      * @return An available room that a new client may be added to.
      */
-    public Room findAvailableRoom(String roomType) {
+    public Room findAvailableRoom(String commandStrategy) {
         List<RoomState> rooms = repository.getAllByClientCountRange(0, 9);
         List<RoomState> roomTypeRooms =
-            rooms.stream().filter(room -> room.getStrategy() == roomType).toList();
+            rooms.stream().filter(room -> room.getCommandStrategy().equals(commandStrategy))
+                .toList();
         RoomState optimalRoom = null;
         for (RoomState room : roomTypeRooms) {
             // prioritize rooms that are closer to being full
@@ -104,7 +105,7 @@ public class RoomService {
                 UUID.randomUUID().toString(),
                 new Canvas(1000, 1000),
                 new HashSet<>(),
-                roomType
+                commandStrategy
             );
         }
 
@@ -118,7 +119,7 @@ public class RoomService {
             optimalRoom.getId(),
             canvas,
             optimalRoom.getClients(),
-            optimalRoom.getStrategy()
+            optimalRoom.getCommandStrategy()
         );
     }
 
