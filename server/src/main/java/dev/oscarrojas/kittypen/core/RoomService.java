@@ -132,4 +132,8 @@ public class RoomService {
         repository.save(getRoomState(room));
     }
 
+    public void deleteRoom(String roomId) {
+        repository.delete(roomId);
+    }
+
 }

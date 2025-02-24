@@ -11,6 +11,7 @@ import dev.oscarrojas.kittypen.core.io.CommandRequest;
 import dev.oscarrojas.kittypen.core.io.CommandResponse;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,7 +34,11 @@ public class DrawCanvasFrameCommand implements Command {
     }
 
     @Override
-    public void setRequestData(CommandRequest<?> request) {
+    public void setRequestData(CommandRequest<Map<String, Object>> request) {
+    }
+
+    @Override
+    public void setBinaryRequestData(CommandRequest<byte[]> request) {
         clientId = request.getClientId();
         frame = frameConverter.fromBytes((byte[]) request.getPayload());
     }

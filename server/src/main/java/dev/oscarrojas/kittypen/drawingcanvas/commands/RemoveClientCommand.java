@@ -30,8 +30,12 @@ public class RemoveClientCommand implements Command {
     }
 
     @Override
-    public void setRequestData(CommandRequest<?> request) {
+    public void setRequestData(CommandRequest<Map<String, Object>> request) {
         clientId = request.getClientId();
+    }
+
+    @Override
+    public void setBinaryRequestData(CommandRequest<byte[]> request) {
     }
 
     @Override

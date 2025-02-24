@@ -6,7 +6,6 @@ import dev.oscarrojas.kittypen.core.io.CommandRequest;
 import dev.oscarrojas.kittypen.core.io.CommandRequestStrategy;
 import dev.oscarrojas.kittypen.core.io.CommandResponse;
 import dev.oscarrojas.kittypen.drawingcanvas.commands.DrawCanvasFrameCommand;
-import dev.oscarrojas.kittypen.drawingcanvas.commands.RegisterClientCommand;
 import dev.oscarrojas.kittypen.drawingcanvas.commands.RemoveClientCommand;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,6 @@ public class DrawingCanvasRequestStrategy implements CommandRequestStrategy {
     private final Map<String, Command> commandMap = new HashMap<>();
 
     public DrawingCanvasRequestStrategy(RoomService roomService) {
-        addCommand(new RegisterClientCommand(roomService));
         addCommand(new RemoveClientCommand(roomService));
         addCommand(new DrawCanvasFrameCommand(roomService));
     }
@@ -44,7 +42,12 @@ public class DrawingCanvasRequestStrategy implements CommandRequestStrategy {
             return Optional.empty();
         }
 
-        command.setRequestData(request);
+        if (request.getPayload() instanceof byte[]) {
+            command.setBinaryRequestData((CommandRequest<byte[]>) request);
+        } else {
+            command.setRequestData((CommandRequest<Map<String, Object>>) request);
+        }
+
         Optional<CommandResponse<?>> response = command.execute();
         command.clearRequestData();
 

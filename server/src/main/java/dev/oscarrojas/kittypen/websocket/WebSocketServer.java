@@ -1,5 +1,7 @@
 package dev.oscarrojas.kittypen.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.oscarrojas.kittypen.websocket.protocol.WebSocketCommandMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.*;
@@ -14,9 +16,12 @@ public class WebSocketServer extends AbstractWebSocketHandler {
     private final WebSocketSessionRepository sessions;
     private final WebSocketCommandMapper mapper;
 
-    public WebSocketServer(WebSocketSessionRepository sessions, WebSocketCommandMapper mapper) {
+    public WebSocketServer(WebSocketSessionRepository sessions) {
         this.sessions = sessions;
-        this.mapper = mapper;
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper = new WebSocketCommandMapper(objectMapper);
     }
 
     void trySendMessage(WebSocketMessage<?> message, List<WebSocketSession> recipients) {
