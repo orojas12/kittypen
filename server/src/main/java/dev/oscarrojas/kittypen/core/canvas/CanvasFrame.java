@@ -3,18 +3,18 @@ package dev.oscarrojas.kittypen.core.canvas;
 public class CanvasFrame {
     private int startX;
     private int startY;
-    private int endX;
-    private int endY;
+    private int width;
+    private int height;
     private byte[] data;
 
     public CanvasFrame() {
     }
 
-    public CanvasFrame(int startX, int startY, int endX, int endY, byte[] data) {
+    public CanvasFrame(int startX, int startY, int width, int height, byte[] data) {
         this.startX = startX;
         this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
+        this.width = width;
+        this.height = height;
         this.data = data;
     }
 
@@ -34,20 +34,20 @@ public class CanvasFrame {
         this.startY = startY;
     }
 
-    public int getEndX() {
-        return endX;
+    public int getWidth() {
+        return width;
     }
 
-    public void setEndX(int endX) {
-        this.endX = endX;
+    public void setWidth(int width) {
+        this.width = width;
     }
 
-    public int getEndY() {
-        return endY;
+    public int getHeight() {
+        return height;
     }
 
-    public void setEndY(int endY) {
-        this.endY = endY;
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public byte[] getData() {

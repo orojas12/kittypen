@@ -10,11 +10,11 @@ public class CanvasFrameBinaryConverter {
 
         frame.setStartX(buffer.getInt());
         frame.setStartY(buffer.getInt());
-        frame.setEndX(buffer.getInt());
-        frame.setEndY(buffer.getInt());
+        frame.setWidth(buffer.getInt());
+        frame.setHeight(buffer.getInt());
 
-        int width = frame.getEndX() - frame.getStartX();
-        int height = frame.getEndY() - frame.getStartY();
+        int width = frame.getWidth() - frame.getStartX();
+        int height = frame.getHeight() - frame.getStartY();
 
         frame.setData(new byte[width * height * 4]);
         buffer.get(buffer.position(), frame.getData());
@@ -27,8 +27,8 @@ public class CanvasFrameBinaryConverter {
 
         buffer.putInt(frame.getStartX());
         buffer.putInt(frame.getStartY());
-        buffer.putInt(frame.getEndX());
-        buffer.putInt(frame.getEndY());
+        buffer.putInt(frame.getWidth());
+        buffer.putInt(frame.getHeight());
 
         byte[] data = frame.getData();
         for (int i = 0; i < data.length; i++) {

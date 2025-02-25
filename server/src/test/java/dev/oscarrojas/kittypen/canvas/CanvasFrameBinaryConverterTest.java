@@ -34,8 +34,8 @@ class CanvasFrameBinaryConverterTest {
 
         assertEquals(1, frame.getStartX());
         assertEquals(2, frame.getStartY());
-        assertEquals(3, frame.getEndX());
-        assertEquals(4, frame.getEndY());
+        assertEquals(3, frame.getWidth());
+        assertEquals(4, frame.getHeight());
         for (int i = 0; i < data.length; i++) {
             assertEquals(data[i], frame.getData()[i]);
         }

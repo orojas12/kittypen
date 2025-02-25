@@ -21,7 +21,7 @@ public class Canvas {
     public Canvas(int width, int height, byte[] data) {
         this.width = width;
         this.height = height;
-        this.data = new byte[data.length];
+        this.data = data;
     }
 
     public Canvas(Canvas canvas) {
@@ -48,12 +48,12 @@ public class Canvas {
         return height;
     }
 
-    public void putData(CanvasFrame frame) {
+    public void putFrame(CanvasFrame frame) {
         byte[] src = frame.getData();
         int startX = frame.getStartX();
         int startY = frame.getStartY();
-        int width = frame.getEndX() - startX;
-        int height = frame.getEndY() - startY;
+        int width = frame.getWidth();
+        int height = frame.getHeight();
 
         for (int i = 0; i < height; i++) {
             int rowIndex = (startY + i) * (this.width * 4) + (startX * 4);
@@ -69,38 +69,38 @@ public class Canvas {
     }
 
     /**
-     * Returns the entire array of image data for the canvas.
+     * Returns a CanvasFrame object representing the image data for a specified portion of the
+     * canvas.
      *
-     * @return full canvas image data
+     * @param startX starting x position
+     * @param startY starting y position
+     * @param width  rectangle width
+     * @param height rectangle height
+     * @return CanvasFrame representing image data of a portion of the canvas
      */
-    public byte[] getData() {
-        return data;
-    }
-
-    public CanvasFrame getFrame() {
+    public CanvasFrame getFrame(int startX, int startY, int width, int height) {
         return new CanvasFrame(
             0,
             0,
-            this.width,
-            this.height,
-            getData()
+            width,
+            height,
+            getData(startX, startY, width, height)
         );
     }
 
     /**
-     * Returns a byte array representing the underlying image data for a specified
-     * portion of the canvas.
+     * Returns a byte array representing the image data for a specified portion of the canvas.
      *
-     * @param x      starting x position
-     * @param y      starting y position
+     * @param startX starting x position
+     * @param startY starting y position
      * @param width  rectangle width
      * @param height rectangle height
      * @return specified portion of canvas image data
      */
-    byte[] getData(int x, int y, int width, int height) {
+    public byte[] getData(int startX, int startY, int width, int height) {
         byte[] data = new byte[width * height * 4];
         for (int i = 0; i < height; i++) {
-            int start = (y + i) * (this.width * 4) + x * 4;
+            int start = (startY + i) * (this.width * 4) + startX * 4;
             for (int j = 0; j < width * 4; j += 4) {
                 int srcIndex = start + j;
                 int dstIndex = i * width * 4 + j;
@@ -110,6 +110,15 @@ public class Canvas {
                 data[dstIndex + 3] = this.data[srcIndex + 3];
             }
         }
+        return data;
+    }
+
+    /**
+     * Returns the entire array of image data for the canvas.
+     *
+     * @return full canvas image data
+     */
+    public byte[] getData() {
         return data;
     }
 

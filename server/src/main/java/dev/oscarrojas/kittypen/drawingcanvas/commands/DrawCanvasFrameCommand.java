@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class DrawCanvasFrameCommand implements Command {
 
-    private static final String name = "draw_canvas_frame";
+    static final String name = "draw_canvas_frame";
     private final CanvasFrameBinaryConverter frameConverter = new CanvasFrameBinaryConverter();
     private final RoomService roomService;
     private String clientId;
@@ -40,7 +40,7 @@ public class DrawCanvasFrameCommand implements Command {
     @Override
     public void setBinaryRequestData(CommandRequest<byte[]> request) {
         clientId = request.getClientId();
-        frame = frameConverter.fromBytes((byte[]) request.getPayload());
+        frame = frameConverter.fromBytes(request.getPayload());
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DrawCanvasFrameCommand implements Command {
 
         Room room = roomOpt.get();
         Canvas canvas = room.getCanvas();
-        canvas.putData(frame);
+        canvas.putFrame(frame);
         roomService.saveRoom(room);
 
         Set<String> targetClients = room.getClients().stream()
