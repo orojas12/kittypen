@@ -11,7 +11,7 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import java.util.List;
 
-import static dev.oscarrojas.kittypen.websocket.protocol.WebSocketCommandMapper.*;
+import static dev.oscarrojas.kittypen.websocket.protocol.CommandMessageMapper.*;
 
 @Configuration
 @EnableWebSocket

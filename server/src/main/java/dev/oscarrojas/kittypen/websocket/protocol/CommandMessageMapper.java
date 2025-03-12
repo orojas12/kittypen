@@ -3,13 +3,14 @@ package dev.oscarrojas.kittypen.websocket.protocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.oscarrojas.kittypen.core.io.CommandMessage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
 
-public class WebSocketCommandMapper {
+public class CommandMessageMapper {
 
     public static final int TIMESTAMP_HEADER_BYTES = 1;
     public static final int COMMAND_HEADER_BYTES = 1;
@@ -18,11 +19,11 @@ public class WebSocketCommandMapper {
 
     private final ObjectMapper mapper;
 
-    public WebSocketCommandMapper(ObjectMapper mapper) {
+    public CommandMessageMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
-    public byte[] toBytes(WebSocketCommandRequest<byte[]> request) {
+    public byte[] toBytes(CommandMessage<byte[]> request) {
         byte[] timestampBytes = request.getTimestamp().toString()
             .getBytes(StandardCharsets.UTF_8);
         byte[] commandBytes = request.getCommand().getBytes(StandardCharsets.UTF_8);
@@ -59,12 +60,12 @@ public class WebSocketCommandMapper {
         return buffer.array();
     }
 
-    public WebSocketCommandRequest<byte[]> fromBytes(ByteBuffer buffer) {
+    public CommandMessage<byte[]> fromBytes(ByteBuffer buffer) {
         if (buffer.position() != 0) {
             buffer.rewind();
         }
 
-        WebSocketCommandRequest<byte[]> webSocketEvent = new WebSocketCommandRequest<>();
+        CommandMessage<byte[]> message = new CommandMessage<>();
 
         try {
 
@@ -76,7 +77,7 @@ public class WebSocketCommandMapper {
             for (int i = 0; i < timestampLength; i++) {
                 timestampBytes[i] = buffer.get();
             }
-            webSocketEvent.setTimestamp(
+            message.setTimestamp(
                 Instant.parse(new String(timestampBytes, StandardCharsets.UTF_8)));
 
             // extract command header
@@ -87,7 +88,7 @@ public class WebSocketCommandMapper {
             for (int i = 0; i < commandLength; i++) {
                 command[i] = buffer.get();
             }
-            webSocketEvent.setCommand(new String(command, StandardCharsets.UTF_8));
+            message.setCommand(new String(command, StandardCharsets.UTF_8));
 
             // extract payload header
             int payloadLength = buffer.getInt();
@@ -109,28 +110,28 @@ public class WebSocketCommandMapper {
             for (int i = 0; i < payloadLength; i++) {
                 payload[i] = buffer.get();
             }
-            webSocketEvent.setPayload(payload);
+            message.setPayload(payload);
 
         } catch (IndexOutOfBoundsException e) {
             throw new BinaryConverterException(
                 "Unexpected end of buffer: \n" + e.getMessage());
         }
 
-        return webSocketEvent;
+        return message;
 
     }
 
-    public WebSocketCommandRequest<byte[]> fromBytes(byte[] bytes) {
+    public CommandMessage<byte[]> fromBytes(byte[] bytes) {
         return fromBytes(ByteBuffer.wrap(bytes));
     }
 
     public String toJson(
-        WebSocketCommandRequest<?> webSocketEvent
+        CommandMessage<?> message
     ) throws JsonProcessingException {
-        return mapper.writeValueAsString(webSocketEvent);
+        return mapper.writeValueAsString(message);
     }
 
-    public WebSocketCommandRequest<Map<String, Object>> fromJson(
+    public CommandMessage<Map<String, Object>> fromJson(
         String json
     ) throws JsonProcessingException {
         return mapper.readValue(

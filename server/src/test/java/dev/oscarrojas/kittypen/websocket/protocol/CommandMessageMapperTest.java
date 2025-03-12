@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.oscarrojas.kittypen.core.io.CommandMessage;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -13,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WebSocketCommandMapperTest {
+public class CommandMessageMapperTest {
 
     @Test
     void toBytes() {
@@ -29,13 +30,14 @@ public class WebSocketCommandMapperTest {
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
 
-        WebSocketCommandMapper converter = new WebSocketCommandMapper(new ObjectMapper());
-        WebSocketCommandRequest<byte[]> request = new WebSocketCommandRequest<>(
+        CommandMessageMapper converter = new CommandMessageMapper(
+            new ObjectMapper());
+        CommandMessage<byte[]> message = new CommandMessage<>(
             Instant.now(),
             command, payload
         );
 
-        byte[] result = converter.toBytes(request);
+        byte[] result = converter.toBytes(message);
         ByteBuffer buffer = ByteBuffer.wrap(result);
 
         for (byte b : result) {
@@ -44,14 +46,14 @@ public class WebSocketCommandMapperTest {
 
         // timestamp header equals timestamp byte length
         byte timestampByteLength = buffer.get();
-        byte[] timestampBytes = request.getTimestamp().toString().getBytes(StandardCharsets.UTF_8);
+        byte[] timestampBytes = message.getTimestamp().toString().getBytes(StandardCharsets.UTF_8);
         assertEquals(timestampBytes.length, timestampByteLength);
 
         // result timestamp equals original timestamp
         byte[] resultTimestampBytes = new byte[timestampByteLength];
         buffer.get(resultTimestampBytes, 0, timestampByteLength);
         assertEquals(
-            request.getTimestamp(),
+            message.getTimestamp(),
             Instant.parse(new String(
                 resultTimestampBytes,
                 StandardCharsets.UTF_8
@@ -95,16 +97,17 @@ public class WebSocketCommandMapperTest {
         payload[5] = (byte) 109;
         payload[6] = (byte) 182;
         payload[7] = (byte) 219;
-        WebSocketCommandMapper converter = new WebSocketCommandMapper(new ObjectMapper());
-        WebSocketCommandRequest<byte[]> request =
-            new WebSocketCommandRequest<>(
+        CommandMessageMapper converter = new CommandMessageMapper(
+            new ObjectMapper());
+        CommandMessage<byte[]> request =
+            new CommandMessage<>(
                 Instant.now(),
                 command,
                 payload
             );
         byte[] bytes = converter.toBytes(request);
 
-        WebSocketCommandRequest<byte[]> result = converter.fromBytes(bytes);
+        CommandMessage<byte[]> result = converter.fromBytes(bytes);
 
         // decoded timestamp equals original timestamp
         assertEquals(request.getTimestamp(), result.getTimestamp());
@@ -124,15 +127,15 @@ public class WebSocketCommandMapperTest {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        WebSocketCommandMapper mapper = new WebSocketCommandMapper(objectMapper);
-        WebSocketCommandRequest<User> request = new WebSocketCommandRequest<>(
+        CommandMessageMapper mapper = new CommandMessageMapper(objectMapper);
+        CommandMessage<User> message = new CommandMessage<>(
             Instant.now(),
             "command",
             new User("user")
         );
-        String json = mapper.toJson(request);
+        String json = mapper.toJson(message);
         assertEquals(
-            "{\"timestamp\":\"" + request.getTimestamp().toString() + "\"," +
+            "{\"timestamp\":\"" + message.getTimestamp().toString() + "\"," +
                 "\"command\":\"command\"," +
                 "\"payload\":{\"name\":\"user\"}}",
             json
@@ -141,7 +144,7 @@ public class WebSocketCommandMapperTest {
 
     @Test
     void fromJson() throws JsonProcessingException {
-        WebSocketCommandRequest<User> request = new WebSocketCommandRequest<>(
+        WebSocketRequest<User> request = new WebSocketRequest<>(
             Instant.now(),
             "command",
             new User("user")
@@ -150,8 +153,8 @@ public class WebSocketCommandMapperTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String json = objectMapper.writeValueAsString(request);
-        WebSocketCommandMapper mapper = new WebSocketCommandMapper(objectMapper);
-        WebSocketCommandRequest<Map<String, Object>> result = mapper.fromJson(json);
+        CommandMessageMapper mapper = new CommandMessageMapper(objectMapper);
+        CommandMessage<Map<String, Object>> result = mapper.fromJson(json);
 
         assertEquals(request.getTimestamp(), result.getTimestamp());
         assertEquals(request.getCommand(), result.getCommand());

@@ -3,12 +3,9 @@ package dev.oscarrojas.kittypen.core.io;
 import java.time.Instant;
 import java.util.Set;
 
-public class CommandResponse<T> {
+public class CommandResponse<T> extends CommandMessage<T> {
 
-    private Instant timestamp;
-    private String command;
     private Set<String> targetClients;
-    private T payload;
 
     public CommandResponse(
         Instant timestamp,
@@ -16,26 +13,8 @@ public class CommandResponse<T> {
         Set<String> targetClients,
         T payload
     ) {
-        this.timestamp = timestamp;
-        this.command = command;
+        super(timestamp, command, payload);
         this.targetClients = targetClients;
-        this.payload = payload;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
     }
 
     public Set<String> getTargetClients() {
@@ -46,11 +25,4 @@ public class CommandResponse<T> {
         this.targetClients = targetClients;
     }
 
-    public T getPayload() {
-        return payload;
-    }
-
-    public void setPayload(T payload) {
-        this.payload = payload;
-    }
 }

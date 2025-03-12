@@ -1,15 +1,13 @@
 package dev.oscarrojas.kittypen.core.io;
 
-import org.springframework.lang.Nullable;
-
 import java.time.Instant;
 
-public class CommandRequest<T> {
+public class CommandRequest<T> extends CommandMessage<T> {
 
-    private Instant timestamp;
     private String clientId;
-    private String command;
-    private T payload;
+
+    public CommandRequest() {
+    }
 
     public CommandRequest(
         Instant timestamp,
@@ -17,18 +15,8 @@ public class CommandRequest<T> {
         String command,
         T payload
     ) {
-        this.timestamp = timestamp;
+        super(timestamp, command, payload);
         this.clientId = clientId;
-        this.command = command;
-        this.payload = payload;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getClientId() {
@@ -39,19 +27,4 @@ public class CommandRequest<T> {
         this.clientId = clientId;
     }
 
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    public T getPayload() {
-        return payload;
-    }
-
-    public void setPayload(@Nullable T payload) {
-        this.payload = payload;
-    }
 }

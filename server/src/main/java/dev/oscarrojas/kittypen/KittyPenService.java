@@ -14,13 +14,13 @@ import org.springframework.stereotype.Controller;
 import java.util.Optional;
 
 @Controller
-public class KittyPenController {
+public class KittyPenService {
 
     private final RoomService roomService;
     private final CommandRequestStrategyFactory strategyFactory;
     private final ClientRegistrarFactory registrarFactory;
 
-    public KittyPenController(
+    public KittyPenService(
         RoomService roomService,
         CommandRequestStrategyFactory strategyFactory,
         ClientRegistrarFactory registrarFactory
