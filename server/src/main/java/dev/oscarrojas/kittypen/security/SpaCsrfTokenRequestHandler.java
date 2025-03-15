@@ -1,4 +1,4 @@
-package dev.oscarrojas.kittypen.config;
+package dev.oscarrojas.kittypen.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

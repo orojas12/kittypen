@@ -1,4 +1,4 @@
-package dev.oscarrojas.kittypen.config;
+package dev.oscarrojas.kittypen.websocket;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
