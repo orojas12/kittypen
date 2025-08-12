@@ -219,16 +219,15 @@ export class Canvas {
       }
     }
 
-    minX -= Math.trunc(this.config.lineWidth / 2);
-    minY -= Math.trunc(this.config.lineWidth / 2);
-    maxX += Math.trunc(this.config.lineWidth / 2);
-    maxY += Math.trunc(this.config.lineWidth / 2);
+    // account for half the line width so the stroke fits
+    // completely inside the box
+    const offset = Math.trunc(this.config.lineWidth / 2);
 
     return {
-      minX,
-      minY,
-      maxX,
-      maxY,
+      minX: minX - offset,
+      minY: minY - offset,
+      maxX: maxX + offset,
+      maxY: maxY + offset,
     };
   };
 }
