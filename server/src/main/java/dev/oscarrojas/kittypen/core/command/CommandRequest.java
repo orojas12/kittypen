@@ -1,4 +1,4 @@
-package dev.oscarrojas.kittypen.core.io;
+package dev.oscarrojas.kittypen.core.command;
 
 import java.time.Instant;
 

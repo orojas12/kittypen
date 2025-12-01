@@ -1,10 +1,10 @@
 package dev.oscarrojas.kittypen.drawingcanvas;
 
 import dev.oscarrojas.kittypen.core.RoomService;
-import dev.oscarrojas.kittypen.core.io.Command;
-import dev.oscarrojas.kittypen.core.io.CommandRequest;
-import dev.oscarrojas.kittypen.core.io.CommandRequestStrategy;
-import dev.oscarrojas.kittypen.core.io.CommandResponse;
+import dev.oscarrojas.kittypen.core.command.Command;
+import dev.oscarrojas.kittypen.core.command.CommandRequest;
+import dev.oscarrojas.kittypen.core.command.CommandRequestStrategy;
+import dev.oscarrojas.kittypen.core.command.CommandResponse;
 import dev.oscarrojas.kittypen.drawingcanvas.commands.DrawCanvasFrameCommand;
 import dev.oscarrojas.kittypen.drawingcanvas.commands.RemoveClientCommand;
 import org.springframework.stereotype.Service;

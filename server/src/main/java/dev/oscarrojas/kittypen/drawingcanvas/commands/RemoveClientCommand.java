@@ -3,9 +3,9 @@ package dev.oscarrojas.kittypen.drawingcanvas.commands;
 import dev.oscarrojas.kittypen.core.Room;
 import dev.oscarrojas.kittypen.core.RoomService;
 import dev.oscarrojas.kittypen.core.client.Client;
-import dev.oscarrojas.kittypen.core.io.Command;
-import dev.oscarrojas.kittypen.core.io.CommandRequest;
-import dev.oscarrojas.kittypen.core.io.CommandResponse;
+import dev.oscarrojas.kittypen.core.command.Command;
+import dev.oscarrojas.kittypen.core.command.CommandRequest;
+import dev.oscarrojas.kittypen.core.command.CommandResponse;
 
 import java.time.Instant;
 import java.util.Map;

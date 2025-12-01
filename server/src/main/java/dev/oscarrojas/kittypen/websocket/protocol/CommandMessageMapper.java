@@ -3,7 +3,7 @@ package dev.oscarrojas.kittypen.websocket.protocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.oscarrojas.kittypen.core.io.CommandMessage;
+import dev.oscarrojas.kittypen.core.command.CommandMessage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
