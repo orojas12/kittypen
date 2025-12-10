@@ -9,7 +9,8 @@ public class NewUserHandler implements MessageHandler<NewUser, NewUser> {
     @Override
     public OutboundMessage<NewUser> handleMessage(InboundMessage<NewUser> inboundMessage) {
         NewUser user = inboundMessage.payload();
-
+        System.out.println(user.username());
+        return null;
     }
 
 }

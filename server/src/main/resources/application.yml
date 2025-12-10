@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: drawandguess
+  threads:
+    virtual:
+      enabled: true
+  thymeleaf:
+    check-template-location: false
+logging:
+  level:
+    root: info

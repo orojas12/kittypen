@@ -6,6 +6,8 @@ import dev.oscarrojas.drawandguess.io.OutboundMessage;
 import dev.oscarrojas.drawandguess.core.lobby.Lobby;
 import dev.oscarrojas.drawandguess.handlers.MessageHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,12 @@ public class DrawAndGuessController {
     public DrawAndGuessController() {
         lobbies = new ArrayList<>();
         messageHandlers = new HashMap<>();
+    }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute("message", "Hello world");
+        return "index";
     }
 
     public <I, O> OutboundMessage<O> handleInboundMessage(InboundMessage<I> message) {
