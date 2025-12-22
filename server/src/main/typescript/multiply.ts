@@ -1,4 +1,4 @@
-import { sum } from "@/sum.ts";
+import { sum } from "@/sum";
 
 export function multiply(a: number, b: number): number {
     sum(1, 1);

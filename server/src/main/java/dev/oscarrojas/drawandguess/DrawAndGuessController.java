@@ -1,7 +1,7 @@
 package dev.oscarrojas.drawandguess;
 
 import dev.oscarrojas.drawandguess.io.InboundMessage;
-import dev.oscarrojas.drawandguess.io.MessageType;
+import dev.oscarrojas.drawandguess.io.Action;
 import dev.oscarrojas.drawandguess.io.OutboundMessage;
 import dev.oscarrojas.drawandguess.core.lobby.Lobby;
 import dev.oscarrojas.drawandguess.handlers.MessageHandler;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class DrawAndGuessController {
 
     private final List<Lobby> lobbies;
-    private final Map<MessageType, MessageHandler<?, ?>> messageHandlers;
+    private final Map<Action, MessageHandler<?, ?>> messageHandlers;
 
     public DrawAndGuessController() {
         lobbies = new ArrayList<>();
@@ -27,27 +27,26 @@ public class DrawAndGuessController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("message", "Hello world");
+        model.addAttribute("message", "Hello!");
         return "index";
     }
 
     public <I, O> OutboundMessage<O> handleInboundMessage(InboundMessage<I> message) {
 
         @SuppressWarnings("unchecked")
-        MessageHandler<I, O> handler = (MessageHandler<I, O>) messageHandlers.get(message.type());
+        MessageHandler<I, O> handler = (MessageHandler<I, O>) messageHandlers.get(message.action());
 
         if (handler == null) {
             throw new IllegalStateException(
-                    "No handler registered for message type: " + message.type()
+                    "No handler registered for message action: " + message.action()
             );
         }
 
         return handler.handleMessage(message);
     }
 
-    public <I, O> void register(MessageType type, MessageHandler<I, O> handler) {
-
-        messageHandlers.put(type, handler);
+    public void register(Action action, MessageHandler<?, ?> handler) {
+        messageHandlers.put(action, handler);
     }
 
 }

@@ -7,15 +7,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: resolve(__dirname, "src/main"),
-  build: {
-    rollupOptions: {
-      input: {
-        index: resolve(__dirname, "src/main/pages/index.html"),
-      },
-    },
-    outDir: resolve(__dirname, "src/main/resources"),
-    emptyOutDir: false
-  },
   test: {
     // ... Specify options here.
     alias: {

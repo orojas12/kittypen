@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "dev": "vite",
-    "build": "tsc && vite build"
+    "compile": "tsc --watch"
   },
   "keywords": [],
   "author": "",

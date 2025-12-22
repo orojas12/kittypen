@@ -1,7 +1,7 @@
 package dev.oscarrojas.drawandguess;
 
 import dev.oscarrojas.drawandguess.io.InboundMessage;
-import dev.oscarrojas.drawandguess.io.MessageType;
+import dev.oscarrojas.drawandguess.io.Action;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ public class DrawAndGuessControllerTest {
         // no handlers registered
         DrawAndGuessController app = new DrawAndGuessController();
 
-        var message = new InboundMessage<>(MessageType.NEW_USER, Instant.now(),
+        var message = new InboundMessage<>(Action.CREATE_USER, Instant.now(),
                 "senderId", "payload");
 
         Assertions.assertThrows(IllegalStateException.class, () ->
