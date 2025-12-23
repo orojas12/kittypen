@@ -55,26 +55,10 @@ public class ProtocolMessageSerializer {
     public ProtocolMessage<?> deserialize(byte[] message) throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(message);
 
-        // read timestamp
-        Instant timestamp = Instant.ofEpochMilli(buffer.getLong());
-
-        // read action size
-        int actionSize = Byte.toUnsignedInt(buffer.get());
-
-        // read action string
-        byte[] actionBytes = new byte[actionSize];
-        buffer.get(actionBytes, 0, actionSize);
-        Action action = Action.valueOf(new String(actionBytes, StandardCharsets.UTF_8));
-
-        // read payload type
-        PayloadType payloadType = PayloadType.fromValue(Byte.toUnsignedInt(buffer.get()));
-
-        // read payload size
-        int payloadSize = buffer.getInt();
-
-        // read payload
-        byte[] payload = new byte[payloadSize];
-        buffer.get(payload, 0, payloadSize);
+        Instant timestamp = readTimestamp(buffer);
+        Action action = readAction(buffer);
+        PayloadType payloadType = readPayloadType(buffer);
+        byte[] payload = readPayload(buffer);
 
 
         if (payloadType == PayloadType.BINARY) {
@@ -98,6 +82,10 @@ public class ProtocolMessageSerializer {
         buffer.putLong(timestamp.toEpochMilli());
     }
 
+    private Instant readTimestamp(ByteBuffer buffer) {
+        return Instant.ofEpochMilli(buffer.getLong());
+    }
+
     private void writeAction(Action action, ByteBuffer buffer) {
         // write action size
         byte[] bytes = action.toString().getBytes(StandardCharsets.UTF_8);
@@ -105,6 +93,13 @@ public class ProtocolMessageSerializer {
 
         // write action
         buffer.put(bytes);
+    }
+
+    private Action readAction(ByteBuffer buffer) {
+        int actionSize = Byte.toUnsignedInt(buffer.get());
+        byte[] actionBytes = new byte[actionSize];
+        buffer.get(actionBytes, 0, actionSize);
+        return Action.valueOf(new String(actionBytes, StandardCharsets.UTF_8));
     }
 
     private void writePayload(byte[] payload, PayloadType type, ByteBuffer buffer) throws JsonProcessingException {
@@ -116,5 +111,16 @@ public class ProtocolMessageSerializer {
 
         // write payload
         buffer.put(payload);
+    }
+
+    private PayloadType readPayloadType(ByteBuffer buffer) {
+        return PayloadType.fromValue(Byte.toUnsignedInt(buffer.get()));
+    }
+
+    private byte[] readPayload(ByteBuffer buffer) {
+        int payloadSize = buffer.getInt();
+        byte[] payload = new byte[payloadSize];
+        buffer.get(payload, 0, payloadSize);
+        return payload;
     }
 }
