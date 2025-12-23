@@ -67,15 +67,13 @@ public class ProtocolMessageSerializer {
                     action,
                     payload
             );
-        } else if (payloadType == PayloadType.JSON) {
+        } else {
             return new ProtocolMessage<>(
                     timestamp,
                     action,
                     objectMapper.readValue(payload, action.payloadType)
             );
         }
-
-        return null;
     }
 
     private void writeTimestamp(Instant timestamp, ByteBuffer buffer) {
