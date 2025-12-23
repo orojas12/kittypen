@@ -5,74 +5,55 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.oscarrojas.drawandguess.io.Action;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
-import static dev.oscarrojas.drawandguess.websocket.protocol.ProtocolMessageSerializer.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProtocolMessageSerializerTest {
 
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final ProtocolMessageSerializer serializer = new ProtocolMessageSerializer(mapper);
+
     @Test
-    void serialize_resultHasCorrectLength() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        ProtocolMessageSerializer serializer = new ProtocolMessageSerializer(mapper);
+    void serializeAndDeserialize_BinaryPayload_ReturnsOriginalMessage() throws IOException {
+        Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        byte[] originalPayload = new byte[]{0, 1, 2};
+        ProtocolMessage<byte[]> originalMessage = new ProtocolMessage<>(timestamp,
+                Action.CREATE_USER, originalPayload);
 
-        ProtocolMessage<byte[]> message = new ProtocolMessage<>(Instant.now(), Action.CREATE_USER,
-                new byte[]{0, 1, 2});
-        var action = message.action().toString().getBytes(StandardCharsets.UTF_8);
-        var payload = message.payload();
-        int expectedLength = TIMESTAMP_BYTE_LENGTH
-                + ACTION_SIZE_BYTE_LENGTH
-                + action.length
-                + PAYLOAD_TYPE_BYTE_LENGTH
-                + PAYLOAD_SIZE_BYTE_LENGTH
-                + payload.length;
-        byte[] result = serializer.serialize(message);
+        byte[] serialized = serializer.serialize(originalMessage);
+        @SuppressWarnings("unchecked")
+        ProtocolMessage<byte[]> deserialized =
+                (ProtocolMessage<byte[]>) serializer.deserialize(serialized);
 
-        assertEquals(expectedLength, result.length);
+        assertEquals(originalMessage.timestamp(), deserialized.timestamp());
+        assertEquals(originalMessage.action(), deserialized.action());
+        assertArrayEquals(originalPayload, deserialized.payload());
     }
 
     @Test
-    void serialize_resultHasCorrectData() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        ProtocolMessageSerializer serializer = new ProtocolMessageSerializer(mapper);
-
-        ProtocolMessage<byte[]> message = new ProtocolMessage<>(Instant.now(), Action.CREATE_USER,
-                new byte[]{0, 1, 2});
-        var expectedTimestamp = message.timestamp();
-        var expectedAction = message.action();
-        var expectedPayload = message.payload();
-
+    void serialize_ProducesExpectedFormat() throws JsonProcessingException {
+        long epochMilli = 1_735_732_801_500L; // Jan 1, 2025, 12:00:01.500 UTC
+        Instant timestamp = Instant.ofEpochMilli(epochMilli);
+        byte[] payload = new byte[]{0, 1, 2};
+        ProtocolMessage<byte[]> message = new ProtocolMessage<>(timestamp,
+                Action.CREATE_USER, payload
+        );
         byte[] result = serializer.serialize(message);
-        ByteBuffer buffer = ByteBuffer.wrap(result);
 
-        // has correct timestamp
-        long epochSeconds = buffer.getLong();
-        int epochNano = buffer.getInt();
-        Instant timestamp = Instant.ofEpochSecond(epochSeconds, epochNano);
-        assertEquals(expectedTimestamp, timestamp);
+        byte[] expectedFormat = new byte[]{
+                0, 0, 1, -108, 33, -68, -81, -36, // Epoch milliseconds (long)
+                11,                         // Action string length (byte)
+                67, 82, 69, 65, 84, 69, 95, 85, 83, 69, 82, // "CREATE_USER"
+                0,                          // Payload type (byte)
+                0, 0, 0, 3,                 // Payload size (int)
+                0, 1, 2                     // Payload data
+        };
 
-        // has correct action
-        int actionLength = Byte.toUnsignedInt(buffer.get()); // 0-255 ascii characters
-        byte[] actionBytes = new byte[actionLength];
-        buffer.get(actionBytes, 0, actionLength);
-        Action action = Action.valueOf(new String(actionBytes, StandardCharsets.UTF_8));
-        assertEquals(expectedAction, action);
-
-        // has correct payload type
-        int payloadType = Byte.toUnsignedInt(buffer.get());
-        assertEquals(PayloadType.BINARY.value, payloadType);
-
-        // has correct payload data
-        int payloadLength = buffer.getInt();
-        byte[] payload = new byte[payloadLength];
-        buffer.get(payload, 0, payloadLength);
-        for (int i = 0; i < expectedPayload.length; i++) {
-            assertEquals(expectedPayload[i], payload[i]);
-        }
+        assertArrayEquals(expectedFormat, result);
     }
-
 
 }

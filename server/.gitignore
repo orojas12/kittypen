@@ -6,6 +6,8 @@ target/
 
 node_modules
 
+src/main/resources/static/js
+
 ### STS ###
 .apt_generated
 .classpath

@@ -10,4 +10,13 @@ public enum PayloadType {
         this.value = value;
     }
 
+    public static PayloadType fromValue(int value) {
+        for (PayloadType type : PayloadType.values()) {
+            if (type.value == value) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown payload type value: " + value);
+    }
+
 }

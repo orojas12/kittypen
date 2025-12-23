@@ -15,9 +15,7 @@ public class ProtocolMessageSerializer {
     public static final int ACTION_SIZE_BYTE_LENGTH = Byte.BYTES;
     public static final int PAYLOAD_TYPE_BYTE_LENGTH = Byte.BYTES;
     public static final int PAYLOAD_SIZE_BYTE_LENGTH = Integer.BYTES;
-
-    // RFC 3339: 'YYYY-MM-DDTHH:MM:SS.SSSZ' (UTC)
-    public static final int TIMESTAMP_BYTE_LENGTH = Long.BYTES + Integer.BYTES;
+    public static final int TIMESTAMP_BYTE_LENGTH = Long.BYTES;
 
     private final ObjectMapper objectMapper;
 
@@ -29,8 +27,8 @@ public class ProtocolMessageSerializer {
         byte[] action = message.action().toString().getBytes(StandardCharsets.UTF_8);
         PayloadType payloadType = message.payload() instanceof byte[] ? PayloadType.BINARY :
                 PayloadType.JSON;
-        byte[] payload;
 
+        byte[] payload;
         if (payloadType == PayloadType.BINARY) {
             payload = (byte[]) message.payload();
         } else {
@@ -57,45 +55,37 @@ public class ProtocolMessageSerializer {
     public ProtocolMessage<?> deserialize(byte[] message) throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(message);
 
-        // extract timestamp header
-        int timestampLength = buffer.get() & 0xFF;
+        // read timestamp
+        Instant timestamp = Instant.ofEpochMilli(buffer.getLong());
 
-        // extract timestamp
-        byte[] timestamp = new byte[timestampLength];
-        for (int i = 0; i < timestampLength; i++) {
-            timestamp[i] = buffer.get();
-        }
+        // read action size
+        int actionSize = Byte.toUnsignedInt(buffer.get());
 
-        // extract action header
-        int typeLength = buffer.get() & 0xFF;
-
-        // extract action
-        byte[] actionBytes = new byte[typeLength];
-        for (int i = 0; i < typeLength; i++) {
-            actionBytes[i] = buffer.get();
-        }
-
-        // extract payload header
-        int payloadType = buffer.get() & 0xFF;
-        int payloadLength = buffer.getInt();
-
-        // extract payload
-        byte[] payload = new byte[payloadLength];
-        for (int i = 0; i < payloadLength; i++) {
-            payload[i] = buffer.get();
-        }
-
+        // read action string
+        byte[] actionBytes = new byte[actionSize];
+        buffer.get(actionBytes, 0, actionSize);
         Action action = Action.valueOf(new String(actionBytes, StandardCharsets.UTF_8));
 
-        if (payloadType == PayloadType.BINARY.value) {
+        // read payload type
+        PayloadType payloadType = PayloadType.fromValue(Byte.toUnsignedInt(buffer.get()));
+
+        // read payload size
+        int payloadSize = buffer.getInt();
+
+        // read payload
+        byte[] payload = new byte[payloadSize];
+        buffer.get(payload, 0, payloadSize);
+
+
+        if (payloadType == PayloadType.BINARY) {
             return new ProtocolMessage<>(
-                    Instant.parse(new String(timestamp, StandardCharsets.UTF_8)),
+                    timestamp,
                     action,
                     payload
             );
-        } else if (payloadType == PayloadType.JSON.value) {
+        } else if (payloadType == PayloadType.JSON) {
             return new ProtocolMessage<>(
-                    Instant.parse(new String(timestamp, StandardCharsets.UTF_8)),
+                    timestamp,
                     action,
                     objectMapper.readValue(payload, action.payloadType)
             );
@@ -104,14 +94,11 @@ public class ProtocolMessageSerializer {
         return null;
     }
 
-    void writeTimestamp(Instant timestamp, ByteBuffer buffer) {
-        long epochSeconds = timestamp.getEpochSecond();
-        int epochNano = timestamp.getNano();
-        buffer.putLong(epochSeconds);
-        buffer.putInt(epochNano);
+    private void writeTimestamp(Instant timestamp, ByteBuffer buffer) {
+        buffer.putLong(timestamp.toEpochMilli());
     }
 
-    void writeAction(Action action, ByteBuffer buffer) {
+    private void writeAction(Action action, ByteBuffer buffer) {
         // write action size
         byte[] bytes = action.toString().getBytes(StandardCharsets.UTF_8);
         buffer.put((byte) bytes.length);
@@ -120,7 +107,7 @@ public class ProtocolMessageSerializer {
         buffer.put(bytes);
     }
 
-    void writePayload(byte[] payload, PayloadType type, ByteBuffer buffer) throws JsonProcessingException {
+    private void writePayload(byte[] payload, PayloadType type, ByteBuffer buffer) throws JsonProcessingException {
         // write payload type
         buffer.put((byte) type.value);
 
