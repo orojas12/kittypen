@@ -1,15 +1,13 @@
-package dev.oscarrojas.drawandguess.core.user;
+package dev.oscarrojas.drawandguess.core.lobby.user;
 
-public class ClientRegistration {
+public class User {
 
     private String id;
     private String username;
-    private String registrar;
 
-    public ClientRegistration(String id, String username, String registrar) {
+    public User(String id, String username) {
         this.id = id;
         this.username = username;
-        this.registrar = registrar;
     }
 
     public String getId() {
@@ -27,13 +25,4 @@ public class ClientRegistration {
     public void setUsername(String username) {
         this.username = username;
     }
-
-    public String getRegistrar() {
-        return registrar;
-    }
-
-    public void setRegistrar(String registrar) {
-        this.registrar = registrar;
-    }
-
 }

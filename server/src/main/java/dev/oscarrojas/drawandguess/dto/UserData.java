@@ -1,4 +1,4 @@
 package dev.oscarrojas.drawandguess.dto;
 
-public record NewUser(String username) {
+public record UserData(String username) {
 }

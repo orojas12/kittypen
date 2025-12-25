@@ -1,4 +1,4 @@
-package dev.oscarrojas.drawandguess.core.canvas;
+package dev.oscarrojas.drawandguess.core.lobby.canvas;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -80,11 +80,11 @@ public class Canvas {
      */
     public CanvasFrame getFrame(int startX, int startY, int width, int height) {
         return new CanvasFrame(
-            0,
-            0,
-            width,
-            height,
-            getData(startX, startY, width, height)
+                0,
+                0,
+                width,
+                height,
+                getData(startX, startY, width, height)
         );
     }
 

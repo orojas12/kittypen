@@ -1,7 +1,7 @@
 package dev.oscarrojas.drawandguess.canvas;
 
-import dev.oscarrojas.drawandguess.core.canvas.CanvasFrame;
-import dev.oscarrojas.drawandguess.core.canvas.CanvasFrameBinaryConverter;
+import dev.oscarrojas.drawandguess.core.lobby.canvas.CanvasFrame;
+import dev.oscarrojas.drawandguess.core.lobby.canvas.CanvasFrameBinaryConverter;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;

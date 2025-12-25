@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lobby</title>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+<div>
+    <h1>
+        Lobby ID: <span th:text="${lobby.lobbyId}"/>
+    </h1>
+    <div>
+        <h2>Users:</h2>
+        <ul th:each="user : ${lobby.users}">
+            <li th:text="${user}"/>
+        </ul>
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

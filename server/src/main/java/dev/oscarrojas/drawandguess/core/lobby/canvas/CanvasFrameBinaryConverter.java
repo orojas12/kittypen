@@ -1,4 +1,4 @@
-package dev.oscarrojas.drawandguess.core.canvas;
+package dev.oscarrojas.drawandguess.core.lobby.canvas;
 
 import java.nio.ByteBuffer;
 

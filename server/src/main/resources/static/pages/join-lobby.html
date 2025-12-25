@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Draw and Guess</title>
+    <title>Join a lobby</title>
     <script type="module" src="/js/index.js"></script>
     <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
 <div>
     <h1>
-        Draw and Guess!
+        Join a lobby
     </h1>
-    <form th:action="@{/lobby/create}" method="post" th:object="${createLobby}">
+    <form th:action="@{/lobby/join}" th:object="${joinLobby}" method="post">
+        <label for="lobby-id">Lobby ID</label>
+        <input id="lobby-id" name="lobbyId" type="text"/>
         <label for="username">Username</label>
         <input id="username" th:field="*{username}" type="text"/>
-        <button type="submit">Create</button>
-        <a th:href="@{/lobby/join}">Join existing lobby</a>
+        <button type="submit">Join</button>
     </form>
 </div>
 
