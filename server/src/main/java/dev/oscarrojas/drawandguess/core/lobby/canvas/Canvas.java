@@ -49,21 +49,22 @@ public class Canvas {
     }
 
     public void putFrame(CanvasFrame frame) {
-        byte[] src = frame.getData();
+        byte[] frameData = frame.getData();
         int startX = frame.getStartX();
         int startY = frame.getStartY();
-        int width = frame.getWidth();
-        int height = frame.getHeight();
+        int frameWidth = frame.getWidth();
+        int frameHeight = frame.getHeight();
 
-        for (int i = 0; i < height; i++) {
-            int rowIndex = (startY + i) * (this.width * 4) + (startX * 4);
-            for (int j = 0; j < width; j++) {
-                int destIndex = rowIndex + j * 4;
-                int srcIndex = (i * width + j) * 4;
-                data[destIndex] = src[srcIndex];
-                data[destIndex + 1] = src[srcIndex + 1];
-                data[destIndex + 2] = src[srcIndex + 2];
-                data[destIndex + 3] = src[srcIndex + 3];
+        for (int frameY = 0; frameY < frameHeight; frameY++) {
+            for (int frameX = 0; frameX < frameWidth; frameX++) {
+                int x = startX + frameX;
+                int y = startY + frameY;
+                int index = (y * this.width + x) * 4;
+                int frameIndex = (frameY * frameWidth + frameX) * 4;
+                data[index] = frameData[frameIndex];
+                data[index + 1] = frameData[frameIndex + 1];
+                data[index + 2] = frameData[frameIndex + 2];
+                data[index + 3] = frameData[frameIndex + 3];
             }
         }
     }
