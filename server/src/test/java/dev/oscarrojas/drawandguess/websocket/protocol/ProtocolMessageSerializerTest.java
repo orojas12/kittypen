@@ -22,7 +22,7 @@ public class ProtocolMessageSerializerTest {
         Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         byte[] originalPayload = new byte[]{0, 1, 2};
         ProtocolMessage<byte[]> originalMessage = new ProtocolMessage<>(timestamp,
-                Action.CREATE_USER, originalPayload);
+                Action.CREATE_LOBBY, originalPayload);
 
         byte[] serialized = serializer.serialize(originalMessage);
         @SuppressWarnings("unchecked")
@@ -40,14 +40,14 @@ public class ProtocolMessageSerializerTest {
         Instant timestamp = Instant.ofEpochMilli(epochMilli);
         byte[] payload = new byte[]{0, 1, 2};
         ProtocolMessage<byte[]> message = new ProtocolMessage<>(timestamp,
-                Action.CREATE_USER, payload
+                Action.CREATE_LOBBY, payload
         );
         byte[] result = serializer.serialize(message);
 
         byte[] expectedFormat = new byte[]{
                 0, 0, 1, -108, 33, -68, -81, -36, // Epoch milliseconds (long)
-                11,                         // Action string length (byte)
-                67, 82, 69, 65, 84, 69, 95, 85, 83, 69, 82, // "CREATE_USER"
+                12,                         // Action string length (byte)
+                67, 82, 69, 65, 84, 69, 95, 76, 79, 66, 66, 89, // "CREATE_LOBBY"
                 0,                          // Payload type (byte)
                 0, 0, 0, 3,                 // Payload size (int)
                 0, 1, 2                     // Payload data

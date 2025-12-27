@@ -4,7 +4,7 @@ import dev.oscarrojas.drawandguess.dto.CreateLobby;
 
 public enum Action {
 
-    CREATE_USER(CreateLobby.class);
+    CREATE_LOBBY(CreateLobby.class);
 
     public final Class<?> payloadType;
 

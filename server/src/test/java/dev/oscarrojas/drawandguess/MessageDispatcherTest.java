@@ -15,7 +15,7 @@ public class MessageDispatcherTest {
         // no handlers registered
         MessageDispatcher dispatcher = new MessageDispatcher();
 
-        var message = new InboundMessage<>(Action.CREATE_USER, Instant.now(),
+        var message = new InboundMessage<>(Action.CREATE_LOBBY, Instant.now(),
                 "senderId", "payload");
 
         Assertions.assertThrows(IllegalStateException.class, () ->
