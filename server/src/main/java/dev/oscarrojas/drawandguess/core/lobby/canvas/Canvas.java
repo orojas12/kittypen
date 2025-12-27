@@ -1,16 +1,14 @@
 package dev.oscarrojas.drawandguess.core.lobby.canvas;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 
 public class Canvas {
 
-    private String id = UUID.randomUUID().toString();
-    private int width;
-    private int height;
-    private byte[] data;
-    private Instant lastUpdated = Instant.ofEpochMilli(Instant.now().toEpochMilli());
+    private final String id = UUID.randomUUID().toString();
+    private final int width;
+    private final int height;
+    private final byte[] data;
 
     public Canvas(int width, int height) {
         this.width = width;
@@ -24,20 +22,8 @@ public class Canvas {
         this.data = data;
     }
 
-    public Canvas(Canvas canvas) {
-        this.id = canvas.getId();
-        this.width = canvas.width;
-        this.height = canvas.height;
-        this.data = Arrays.copyOf(canvas.getData(), canvas.getData().length);
-        this.lastUpdated = canvas.getLastUpdated();
-    }
-
     String getId() {
         return id;
-    }
-
-    void setId(String id) {
-        this.id = id;
     }
 
     public int getWidth() {
@@ -48,90 +34,114 @@ public class Canvas {
         return height;
     }
 
+    /**
+     * Inserts pixel data from a canvas frame into the canvas' data array
+     *
+     * @param frame canvas frame
+     */
     public void putFrame(CanvasFrame frame) {
-        byte[] frameData = frame.getData();
-        int startX = frame.getStartX();
-        int startY = frame.getStartY();
-        int frameWidth = frame.getWidth();
-        int frameHeight = frame.getHeight();
-
-        for (int frameY = 0; frameY < frameHeight; frameY++) {
-            for (int frameX = 0; frameX < frameWidth; frameX++) {
-                int x = startX + frameX;
-                int y = startY + frameY;
-                int index = (y * this.width + x) * 4;
-                int frameIndex = (frameY * frameWidth + frameX) * 4;
-                data[index] = frameData[frameIndex];
-                data[index + 1] = frameData[frameIndex + 1];
-                data[index + 2] = frameData[frameIndex + 2];
-                data[index + 3] = frameData[frameIndex + 3];
-            }
-        }
+        copyToDst(
+                frame.getData(), this.data,
+                frame.getStartX(), frame.getStartY(),
+                frame.getWidth(), frame.getHeight(),
+                this.width, this.height
+        );
     }
 
     /**
-     * Returns a CanvasFrame object representing the image data for a specified portion of the
-     * canvas.
+     * Gets a frame or rectangle representing a portion of the canvas.
      *
      * @param startX starting x position
      * @param startY starting y position
      * @param width  rectangle width
      * @param height rectangle height
-     * @return CanvasFrame representing image data of a portion of the canvas
+     * @return A frame representing a portion of the canvas
      */
     public CanvasFrame getFrame(int startX, int startY, int width, int height) {
+        byte[] frameData = new byte[width * height * 4];
+
+        copyFromSrc(
+                this.data, frameData,
+                startX, startY,
+                this.width, this.height,
+                width, height
+        );
+
         return new CanvasFrame(
                 0,
                 0,
                 width,
                 height,
-                getData(startX, startY, width, height)
+                frameData
         );
     }
 
-    /**
-     * Returns a byte array representing the image data for a specified portion of the canvas.
-     *
-     * @param startX starting x position
-     * @param startY starting y position
-     * @param width  rectangle width
-     * @param height rectangle height
-     * @return specified portion of canvas image data
-     */
-    public byte[] getData(int startX, int startY, int width, int height) {
-        byte[] data = new byte[width * height * 4];
-        for (int i = 0; i < height; i++) {
-            int start = (startY + i) * (this.width * 4) + startX * 4;
-            for (int j = 0; j < width * 4; j += 4) {
-                int srcIndex = start + j;
-                int dstIndex = i * width * 4 + j;
-                data[dstIndex] = this.data[srcIndex];
-                data[dstIndex + 1] = this.data[srcIndex + 1];
-                data[dstIndex + 2] = this.data[srcIndex + 2];
-                data[dstIndex + 3] = this.data[srcIndex + 3];
-            }
+    private static void copyToDst(
+            byte[] src, byte[] dst,
+            int dstX, int dstY,
+            int srcWidth, int srcHeight,
+            int dstWidth, int dstHeight
+    ) {
+        int bytesPerPixel = 4;
+
+        // src or dst have incorrect buffer size
+        if (src.length < srcWidth * srcHeight * bytesPerPixel ||
+                dst.length < dstWidth * dstHeight * bytesPerPixel
+        ) {
+            throw new IllegalArgumentException("Invalid src or dst buffer size");
         }
-        return data;
+
+        // frame is not within dst dimensions
+        if (dstX < 0 || dstY < 0 ||
+                dstX > dstWidth - 1 || dstY > dstHeight - 1 ||
+                dstX + srcWidth > dstWidth ||
+                dstY + srcHeight > dstHeight
+        ) {
+            throw new IllegalArgumentException("Source data does not fit in destination");
+        }
+
+        for (int srcRow = 0; srcRow < srcHeight; srcRow++) {
+            // copy one row at a time
+            int srcPos = srcRow * srcWidth * bytesPerPixel;
+            int dstPos = (((dstY + srcRow) * dstWidth) + dstX) * bytesPerPixel;
+            System.arraycopy(src, srcPos, dst, dstPos, srcWidth * bytesPerPixel);
+        }
     }
 
-    /**
-     * Returns the entire array of image data for the canvas.
-     *
-     * @return full canvas image data
-     */
-    public byte[] getData() {
-        return data;
+    private static void copyFromSrc(
+            byte[] src, byte[] dst,
+            int srcX, int srcY,
+            int srcWidth, int srcHeight,
+            int dstWidth, int dstHeight
+    ) {
+        int bytesPerPixel = 4;
+
+        // src or dst have incorrect buffer size
+        if (src.length != srcWidth * srcHeight * bytesPerPixel ||
+                dst.length != dstWidth * dstHeight * bytesPerPixel
+        ) {
+            throw new IllegalArgumentException("Invalid src or dst buffer size");
+        }
+
+        // frame is not within src dimensions
+        if (srcX < 0 || srcY < 0 ||
+                srcX > srcWidth - 1 || srcY > srcHeight - 1 ||
+                srcX + dstWidth > srcWidth ||
+                srcY + dstHeight > srcHeight
+        ) {
+            throw new IllegalArgumentException("Source data does not fit in destination");
+        }
+
+        for (int dstRow = 0; dstRow < dstHeight; dstRow++) {
+            // copy one row at a time
+            int srcPos = (((srcY + dstRow) * srcWidth) + srcX) * bytesPerPixel;
+            int dstPos = dstRow * dstWidth * bytesPerPixel;
+            System.arraycopy(src, srcPos, dst, dstPos, dstWidth * bytesPerPixel);
+        }
     }
 
     void reset() {
         Arrays.fill(data, (byte) 0);
     }
 
-    public Instant getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(Instant lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
 }
