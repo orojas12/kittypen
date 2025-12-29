@@ -17,5 +17,10 @@
       "@/*": ["src/main/typescript/*"]
     }
   },
-  "include": ["src/main/typescript/"]
+  "include": ["src/main/typescript/"],
+
+  "tsc-alias": {
+    "verbose": true,
+    "resolveFullPaths": true
+  }
 }

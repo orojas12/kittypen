@@ -5,16 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "compile": "tsc --watch"
+    "compile": "concurrently 'tsc -w' 'tsc-alias -p tsconfig.json -w'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "imports": {
+    "@/*": "./src/main/resources/static/js/*"
+  },
   "devDependencies": {
     "@types/node": "^24.10.2",
     "canvas": "^3.2.0",
+    "concurrently": "^9.2.1",
     "jsdom": "^27.3.0",
     "prettier": "3.7.4",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
     "vitest": "^4.0.15"
