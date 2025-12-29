@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Lobby</title>
-    <script type="module" src="/js/index.js"></script>
+    <script type="module" src="/js/lobby.js"></script>
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/lobby.css">
 </head>
 <body>
 <div>
@@ -16,6 +17,12 @@
         <ul th:each="user : ${lobby.users}">
             <li th:text="${user}"/>
         </ul>
+    </div>
+
+    <div class="container">
+        <div class="canvas-wrapper">
+            <canvas class="canvas" id="canvas"></canvas>
+        </div>
     </div>
 
 

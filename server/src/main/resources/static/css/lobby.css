@@ -1,0 +1,37 @@
+.container {
+    display: flex;
+    gap: 16px;
+}
+
+.canvas-wrapper {
+    background-color: #eee;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px;
+    width: max-content;
+    margin-inline: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.controls button {
+    border: none;
+    border-radius: 4px;
+    background-color: royalblue;
+    color: white;
+    padding: 8px 16px;
+    font-size: 16px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background-color: rgb(40, 78, 194);
+}
+
+.canvas {
+    touch-action: none;
+    aspect-ratio: 1;
+    width: 720px;
+    image-rendering: pixelated;
+}
