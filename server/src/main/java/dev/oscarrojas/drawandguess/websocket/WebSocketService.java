@@ -26,25 +26,24 @@ public class WebSocketService extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(
-            WebSocketSession session, TextMessage message) throws Exception {
-        System.out.printf("Message from websocket %s: %s%n", session.getId(),
-                message.toString());
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        System.out.printf("Message from websocket %s: %s%n", session.getId(), message.toString());
     }
 
-//    @Override
-//    protected void handleBinaryMessage(
-//            WebSocketSession session, BinaryMessage message) throws Exception {
-//        ProtocolMessage<?> protocolMessage = serializer.deserialize(message.getPayload().array());
-//        InboundMessage<?> inboundMessage = new InboundMessage<>(protocolMessage.action(),
-//                protocolMessage.timestamp(), session.getId(), protocolMessage.payload());
-//        dispatcher.handleInboundMessage(inboundMessage);
-//    }
-//
-//
-//    @Override
-//    protected void handlePongMessage(
-//            WebSocketSession session, PongMessage message) throws Exception {
-//    }
+    //    @Override
+    //    protected void handleBinaryMessage(
+    //            WebSocketSession session, BinaryMessage message) throws Exception {
+    //        ProtocolMessage<?> protocolMessage =
+    // serializer.deserialize(message.getPayload().array());
+    //        InboundMessage<?> inboundMessage = new InboundMessage<>(protocolMessage.action(),
+    //                protocolMessage.timestamp(), session.getId(), protocolMessage.payload());
+    //        dispatcher.handleInboundMessage(inboundMessage);
+    //    }
+    //
+    //
+    //    @Override
+    //    protected void handlePongMessage(
+    //            WebSocketSession session, PongMessage message) throws Exception {
+    //    }
 
 }

@@ -26,8 +26,7 @@ public class CanvasFrameSerializer {
         frame.setWidth(buffer.getInt());
         frame.setHeight(buffer.getInt());
 
-        int frameDataLength = (frame.getWidth() - frame.getStartX()) *
-                (frame.getHeight() - frame.getStartY()) * 4;
+        int frameDataLength = (frame.getWidth() - frame.getStartX()) * (frame.getHeight() - frame.getStartY()) * 4;
 
         byte[] frameData = new byte[frameDataLength];
         buffer.get(frameData, 0, frameDataLength);
@@ -36,6 +35,4 @@ public class CanvasFrameSerializer {
 
         return frame;
     }
-
-
 }

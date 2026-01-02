@@ -1,4 +1,3 @@
 package dev.oscarrojas.drawandguess.dto;
 
-public record CreateLobby(String username) {
-}
+public record CreateLobby(String username) {}

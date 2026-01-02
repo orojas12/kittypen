@@ -1,10 +1,9 @@
 package dev.oscarrojas.drawandguess.websocket;
 
 import jakarta.annotation.Nullable;
-import org.springframework.web.socket.WebSocketSession;
-
 import java.util.Map;
 import java.util.Set;
+import org.springframework.web.socket.WebSocketSession;
 
 public class InMemoryWebSocketSessionRepository implements WebSocketSessionRepository {
 
@@ -26,8 +25,5 @@ public class InMemoryWebSocketSessionRepository implements WebSocketSessionRepos
     }
 
     @Override
-    public void deleteById(String id) {
-
-    }
-
+    public void deleteById(String id) {}
 }

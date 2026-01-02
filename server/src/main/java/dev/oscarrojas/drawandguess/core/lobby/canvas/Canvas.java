@@ -41,11 +41,14 @@ public class Canvas {
      */
     public void putFrame(CanvasFrame frame) {
         copyToDst(
-                frame.getData(), this.data,
-                frame.getStartX(), frame.getStartY(),
-                frame.getWidth(), frame.getHeight(),
-                this.width, this.height
-        );
+                frame.getData(),
+                this.data,
+                frame.getStartX(),
+                frame.getStartY(),
+                frame.getWidth(),
+                frame.getHeight(),
+                this.width,
+                this.height);
     }
 
     /**
@@ -60,43 +63,27 @@ public class Canvas {
     public CanvasFrame getFrame(int startX, int startY, int width, int height) {
         byte[] frameData = new byte[width * height * 4];
 
-        copyFromSrc(
-                this.data, frameData,
-                startX, startY,
-                this.width, this.height,
-                width, height
-        );
+        copyFromSrc(this.data, frameData, startX, startY, this.width, this.height, width, height);
 
-        return new CanvasFrame(
-                0,
-                0,
-                width,
-                height,
-                frameData
-        );
+        return new CanvasFrame(0, 0, width, height, frameData);
     }
 
     private static void copyToDst(
-            byte[] src, byte[] dst,
-            int dstX, int dstY,
-            int srcWidth, int srcHeight,
-            int dstWidth, int dstHeight
-    ) {
+            byte[] src, byte[] dst, int dstX, int dstY, int srcWidth, int srcHeight, int dstWidth, int dstHeight) {
         int bytesPerPixel = 4;
 
         // src or dst have incorrect buffer size
-        if (src.length < srcWidth * srcHeight * bytesPerPixel ||
-                dst.length < dstWidth * dstHeight * bytesPerPixel
-        ) {
+        if (src.length < srcWidth * srcHeight * bytesPerPixel || dst.length < dstWidth * dstHeight * bytesPerPixel) {
             throw new IllegalArgumentException("Invalid src or dst buffer size");
         }
 
         // frame is not within dst dimensions
-        if (dstX < 0 || dstY < 0 ||
-                dstX > dstWidth - 1 || dstY > dstHeight - 1 ||
-                dstX + srcWidth > dstWidth ||
-                dstY + srcHeight > dstHeight
-        ) {
+        if (dstX < 0
+                || dstY < 0
+                || dstX > dstWidth - 1
+                || dstY > dstHeight - 1
+                || dstX + srcWidth > dstWidth
+                || dstY + srcHeight > dstHeight) {
             throw new IllegalArgumentException("Source data does not fit in destination");
         }
 
@@ -109,26 +96,21 @@ public class Canvas {
     }
 
     private static void copyFromSrc(
-            byte[] src, byte[] dst,
-            int srcX, int srcY,
-            int srcWidth, int srcHeight,
-            int dstWidth, int dstHeight
-    ) {
+            byte[] src, byte[] dst, int srcX, int srcY, int srcWidth, int srcHeight, int dstWidth, int dstHeight) {
         int bytesPerPixel = 4;
 
         // src or dst have incorrect buffer size
-        if (src.length != srcWidth * srcHeight * bytesPerPixel ||
-                dst.length != dstWidth * dstHeight * bytesPerPixel
-        ) {
+        if (src.length != srcWidth * srcHeight * bytesPerPixel || dst.length != dstWidth * dstHeight * bytesPerPixel) {
             throw new IllegalArgumentException("Invalid src or dst buffer size");
         }
 
         // frame is not within src dimensions
-        if (srcX < 0 || srcY < 0 ||
-                srcX > srcWidth - 1 || srcY > srcHeight - 1 ||
-                srcX + dstWidth > srcWidth ||
-                srcY + dstHeight > srcHeight
-        ) {
+        if (srcX < 0
+                || srcY < 0
+                || srcX > srcWidth - 1
+                || srcY > srcHeight - 1
+                || srcX + dstWidth > srcWidth
+                || srcY + dstHeight > srcHeight) {
             throw new IllegalArgumentException("Source data does not fit in destination");
         }
 
@@ -143,5 +125,4 @@ public class Canvas {
     void reset() {
         Arrays.fill(data, (byte) 0);
     }
-
 }

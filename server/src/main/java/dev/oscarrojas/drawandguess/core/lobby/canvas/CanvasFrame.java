@@ -7,8 +7,7 @@ public class CanvasFrame {
     private int height;
     private byte[] data;
 
-    public CanvasFrame() {
-    }
+    public CanvasFrame() {}
 
     public CanvasFrame(int startX, int startY, int width, int height, byte[] data) {
         this.startX = startX;

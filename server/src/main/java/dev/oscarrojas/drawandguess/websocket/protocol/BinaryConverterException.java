@@ -5,5 +5,4 @@ public class BinaryConverterException extends RuntimeException {
     BinaryConverterException(String message) {
         super(message);
     }
-
 }

@@ -5,7 +5,6 @@ import dev.oscarrojas.drawandguess.handlers.MessageHandler;
 import dev.oscarrojas.drawandguess.io.Action;
 import dev.oscarrojas.drawandguess.io.InboundMessage;
 import dev.oscarrojas.drawandguess.io.OutboundMessage;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +26,7 @@ public class MessageDispatcher {
         MessageHandler<I, O> handler = (MessageHandler<I, O>) messageHandlers.get(message.action());
 
         if (handler == null) {
-            throw new IllegalStateException(
-                    "No handler registered for message action: " + message.action()
-            );
+            throw new IllegalStateException("No handler registered for message action: " + message.action());
         }
 
         return handler.handleMessage(message);
@@ -38,5 +35,4 @@ public class MessageDispatcher {
     public void register(Action action, MessageHandler<?, ?> handler) {
         messageHandlers.put(action, handler);
     }
-
 }

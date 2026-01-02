@@ -12,5 +12,4 @@ public class NewUserHandler implements MessageHandler<CreateLobby, CreateLobby> 
         System.out.println(user.username());
         return null;
     }
-
 }

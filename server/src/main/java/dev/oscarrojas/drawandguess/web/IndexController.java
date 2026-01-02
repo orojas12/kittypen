@@ -9,12 +9,11 @@ import dev.oscarrojas.drawandguess.dto.LobbyData;
 import dev.oscarrojas.drawandguess.dto.UserData;
 import dev.oscarrojas.drawandguess.exception.NotFoundException;
 import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.Optional;
 
 @Controller
 public class IndexController {
@@ -57,10 +56,7 @@ public class IndexController {
     public String joinLobby(HttpSession session, JoinLobby dto) {
         LobbyUserRegistration registration;
         try {
-            registration = lobbyManager.addUserToLobby(
-                    new UserData(dto.username()),
-                    dto.lobbyId()
-            );
+            registration = lobbyManager.addUserToLobby(new UserData(dto.username()), dto.lobbyId());
         } catch (NotFoundException | LobbyFullException e) {
             throw new RuntimeException(e);
         }
@@ -78,6 +74,4 @@ public class IndexController {
         model.addAttribute("lobby", lobby);
         return "lobby";
     }
-
-
 }

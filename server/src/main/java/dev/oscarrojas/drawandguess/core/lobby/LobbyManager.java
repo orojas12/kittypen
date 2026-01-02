@@ -6,12 +6,11 @@ import dev.oscarrojas.drawandguess.core.lobby.user.User;
 import dev.oscarrojas.drawandguess.dto.LobbyData;
 import dev.oscarrojas.drawandguess.dto.UserData;
 import dev.oscarrojas.drawandguess.exception.NotFoundException;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LobbyManager {
@@ -30,8 +29,7 @@ public class LobbyManager {
             if (lobby.getId().equals(lobbyId)) {
                 return Optional.of(new LobbyData(
                         lobby.getId(),
-                        lobby.getUsers().stream().map(User::getUsername).toList()
-                ));
+                        lobby.getUsers().stream().map(User::getUsername).toList()));
             }
         }
         return Optional.empty();
@@ -43,15 +41,13 @@ public class LobbyManager {
      * @return Lobby id
      */
     public String createLobby() {
-        Lobby lobby = new Lobby(UUID.randomUUID().toString(),
-                new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
-        );
+        Lobby lobby = new Lobby(UUID.randomUUID().toString(), new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT));
         lobbies.add(lobby);
         return lobby.getId();
     }
 
-
-    public LobbyUserRegistration addUserToLobby(UserData user, String lobbyId) throws NotFoundException, LobbyFullException {
+    public LobbyUserRegistration addUserToLobby(UserData user, String lobbyId)
+            throws NotFoundException, LobbyFullException {
         for (Lobby lobby : lobbies) {
             if (lobby.getId().equals(lobbyId)) {
                 return lobby.addUser(user);
@@ -60,5 +56,4 @@ public class LobbyManager {
 
         throw new NotFoundException(String.format("Lobby id %s not found", lobbyId));
     }
-
 }

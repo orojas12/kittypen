@@ -18,5 +18,4 @@ public enum PayloadType {
         }
         throw new IllegalArgumentException("Unknown payload type value: " + value);
     }
-
 }

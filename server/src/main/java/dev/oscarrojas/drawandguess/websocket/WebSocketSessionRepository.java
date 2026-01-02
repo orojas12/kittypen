@@ -1,8 +1,7 @@
 package dev.oscarrojas.drawandguess.websocket;
 
-import org.springframework.web.socket.WebSocketSession;
-
 import java.util.Set;
+import org.springframework.web.socket.WebSocketSession;
 
 public interface WebSocketSessionRepository {
 
@@ -11,5 +10,4 @@ public interface WebSocketSessionRepository {
     Set<WebSocketSession> getAllById(Iterable<String> ids);
 
     void deleteById(String id);
-
 }

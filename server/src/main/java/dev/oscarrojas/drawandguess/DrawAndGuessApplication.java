@@ -9,5 +9,4 @@ public class DrawAndGuessApplication {
     public static void main(String[] args) {
         SpringApplication.run(DrawAndGuessApplication.class, args);
     }
-
 }

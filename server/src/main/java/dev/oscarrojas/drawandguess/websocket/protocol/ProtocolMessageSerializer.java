@@ -3,7 +3,6 @@ package dev.oscarrojas.drawandguess.websocket.protocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.oscarrojas.drawandguess.io.Action;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -25,8 +24,7 @@ public class ProtocolMessageSerializer {
 
     public byte[] serialize(ProtocolMessage<?> message) throws JsonProcessingException {
         byte[] action = message.action().toString().getBytes(StandardCharsets.UTF_8);
-        PayloadType payloadType = message.payload() instanceof byte[] ? PayloadType.BINARY :
-                PayloadType.JSON;
+        PayloadType payloadType = message.payload() instanceof byte[] ? PayloadType.BINARY : PayloadType.JSON;
 
         byte[] payload;
         if (payloadType == PayloadType.BINARY) {
@@ -35,14 +33,13 @@ public class ProtocolMessageSerializer {
             payload = objectMapper.writeValueAsBytes(message.payload());
         }
 
-        byte[] messageBytes = new byte[
-                TIMESTAMP_BYTE_LENGTH
+        byte[] messageBytes = new byte
+                [TIMESTAMP_BYTE_LENGTH
                         + ACTION_SIZE_BYTE_LENGTH
                         + action.length
                         + PAYLOAD_TYPE_BYTE_LENGTH
                         + PAYLOAD_SIZE_BYTE_LENGTH
-                        + payload.length
-                ];
+                        + payload.length];
 
         ByteBuffer buffer = ByteBuffer.wrap(messageBytes);
         writeTimestamp(message.timestamp(), buffer);
@@ -60,19 +57,10 @@ public class ProtocolMessageSerializer {
         PayloadType payloadType = readPayloadType(buffer);
         byte[] payload = readPayload(buffer);
 
-
         if (payloadType == PayloadType.BINARY) {
-            return new ProtocolMessage<>(
-                    timestamp,
-                    action,
-                    payload
-            );
+            return new ProtocolMessage<>(timestamp, action, payload);
         } else {
-            return new ProtocolMessage<>(
-                    timestamp,
-                    action,
-                    objectMapper.readValue(payload, action.payloadType)
-            );
+            return new ProtocolMessage<>(timestamp, action, objectMapper.readValue(payload, action.payloadType));
         }
     }
 

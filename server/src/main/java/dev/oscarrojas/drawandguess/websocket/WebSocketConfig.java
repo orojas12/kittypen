@@ -7,7 +7,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
-
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
@@ -23,5 +22,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(new ExceptionWebSocketHandlerDecorator(handler), "/lobby/ws")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }
-
 }

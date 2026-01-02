@@ -4,7 +4,6 @@ import dev.oscarrojas.drawandguess.core.exceptions.LobbyFullException;
 import dev.oscarrojas.drawandguess.core.lobby.canvas.Canvas;
 import dev.oscarrojas.drawandguess.core.lobby.user.User;
 import dev.oscarrojas.drawandguess.dto.UserData;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -46,12 +45,9 @@ public class Lobby {
         return false;
     }
 
-    void removeUser(String userId) {
-
-    }
+    void removeUser(String userId) {}
 
     boolean isFull() {
         return users.size() >= 4;
     }
-
 }
