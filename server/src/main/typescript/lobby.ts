@@ -1,4 +1,5 @@
 import { Canvas } from "@/canvas/canvas";
+import { LobbyClient } from "@/lobby/lobby-client";
 
 const canvasElement = document.getElementById(
   "canvas",
@@ -17,3 +18,7 @@ const canvas = new Canvas(context, {
   height: 1000,
   lineWidth: 4,
 });
+
+const client = new LobbyClient(
+  `ws://${window.location.host + window.location.pathname}/ws`,
+);

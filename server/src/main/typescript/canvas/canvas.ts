@@ -97,7 +97,6 @@ export class Canvas {
 
   private handleFrameUpdate = (frame: CanvasFrame) => {
     this.drawBuffer.length = 0;
-    console.log(frame);
   };
 
   private setUpContext = (
@@ -119,8 +118,6 @@ export class Canvas {
   };
 
   private handlePointerEvent = (event: PointerEvent): void => {
-    console.log(event.type);
-
     if (event.type === "pointerdown") {
       this.pointer.x = this.getPointerX(event);
       this.pointer.y = this.getPointerY(event);
